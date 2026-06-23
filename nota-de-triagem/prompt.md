@@ -24,8 +24,8 @@ Transforme o alerta em uma nota operacional concisa, usando exatamente estes cin
 
 ALERTA:
 IMPACTO:
-HIPOTESE INICIAL:
-ACAO IMEDIATA:
+HIPÓTESE INICIAL:
+AÇÃO IMEDIATA:
 ESCALAR PARA:
 
 Regras:

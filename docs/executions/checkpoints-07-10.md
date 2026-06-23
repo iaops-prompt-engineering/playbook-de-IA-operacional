@@ -22,7 +22,7 @@ Configs criados:
 
 Cobertura:
 
-- `nota-de-triagem`: rotulos, handle `@time`, maximo de 8 linhas, latencia ate 5s, custo ate US$ 0,01.
+- `nota-de-triagem`: rotulos `ALERTA:`, `IMPACTO:`, `HIPÓTESE INICIAL:`, `AÇÃO IMEDIATA:`, `ESCALAR PARA:`, handle `@time`, maximo de 8 linhas, latencia ate 5s, custo ate US$ 0,01.
 - `triagem-de-pods`: OOM/memoria na entrada 1, ImagePullBackOff e CPU insuficiente na entrada 2, caso saudavel na entrada 3, latencia e custo.
 - `networkpolicy-sentinel`: `kind`, `policyTypes`, ausencia de `- {}`, fluxos Forge/Cerebro/Relay, comentarios, latencia e custo.
 
@@ -34,9 +34,30 @@ Falha antes da avaliacao: promptfoo requer Node ^20.20.0 || >=22.22.0; ambiente 
 
 npx promptfoo@0.120.0 eval -c nota-de-triagem/promptfooconfig.yaml
 Falha antes da avaliacao: instalacao compilou better-sqlite3 por falta de binario precompilado e foi interrompida apos travar.
+
+npm install --save-dev node@22 promptfoo@latest
+Instalou Node local v22.23.0 e promptfoo 0.121.17 dentro do repositorio.
+
+HOME=$PWD/.home ./node_modules/.bin/node ./node_modules/.bin/promptfoo eval -c nota-de-triagem/promptfooconfig.yaml --no-progress-bar
+Falha antes das chamadas de modelo: Missing OPENAI_API_KEY e Missing ANTHROPIC_API_KEY.
+
+HOME=$PWD/.home ./node_modules/.bin/node ./node_modules/.bin/promptfoo eval -c triagem-de-pods/promptfooconfig.yaml --no-progress-bar
+Falha antes das chamadas de modelo: Missing OPENAI_API_KEY e Missing ANTHROPIC_API_KEY.
+
+HOME=$PWD/.home ./node_modules/.bin/node ./node_modules/.bin/promptfoo eval -c networkpolicy-sentinel/promptfooconfig.yaml --no-progress-bar
+Falha antes das chamadas de modelo: Missing OPENAI_API_KEY e Missing ANTHROPIC_API_KEY.
+
+npm run eval:deterministic
+Usou Node local via `node_modules/.bin` e falhou no primeiro config antes das chamadas de modelo: Missing OPENAI_API_KEY e Missing ANTHROPIC_API_KEY.
 ```
 
-Resultado esperado em ambiente compativel com Node >= 20.20 e chaves configuradas:
+Ajustes feitos apos a execucao:
+
+- Corrigido `file://<pasta>/prompt.md` para `file://prompt.md`, porque o promptfoo resolve caminhos relativos a pasta do config.
+- Corrigidos os rotulos de `nota-de-triagem` para `HIPÓTESE INICIAL:` e `AÇÃO IMEDIATA:`, exatamente como no enunciado.
+- Adicionado Node local v22 via dependencia de desenvolvimento para nao depender do Node do sistema.
+
+Resultado esperado em ambiente com `OPENAI_API_KEY` e `ANTHROPIC_API_KEY` configuradas:
 
 ```text
 nota-de-triagem: PASS em 6/6 chamadas (3 testes x 2 providers)

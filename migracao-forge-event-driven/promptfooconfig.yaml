@@ -1,6 +1,6 @@
 description: migracao-forge-event-driven llm-as-judge gate
 prompts:
-  - file://migracao-forge-event-driven/prompt.md
+  - file://prompt.md
 providers:
   - openai:gpt-4o-mini
 tests:

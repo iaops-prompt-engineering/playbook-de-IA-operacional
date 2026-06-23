@@ -6,9 +6,11 @@
     "node": ">=20.20.0"
   },
   "scripts": {
-    "eval": "for f in */promptfooconfig.yaml; do npx promptfoo@latest eval -c \"$f\" || exit 1; done"
+    "eval": "mkdir -p .home && HOME=$PWD/.home sh -c 'for f in */promptfooconfig.yaml; do promptfoo eval -c \"$f\" || exit 1; done'",
+    "eval:deterministic": "mkdir -p .home && HOME=$PWD/.home promptfoo eval -c nota-de-triagem/promptfooconfig.yaml && HOME=$PWD/.home promptfoo eval -c triagem-de-pods/promptfooconfig.yaml && HOME=$PWD/.home promptfoo eval -c networkpolicy-sentinel/promptfooconfig.yaml"
   },
   "devDependencies": {
-    "promptfoo": "latest"
+    "node": "^22.23.0",
+    "promptfoo": "^0.121.17"
   }
 }
