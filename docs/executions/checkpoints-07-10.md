@@ -52,6 +52,9 @@ Usou Node local via `node_modules/.bin` e falhou no primeiro config antes das ch
 
 npm run eval:deterministic apos remover Anthropic dos configs ativos
 Falha antes das chamadas de modelo: Missing OPENAI_API_KEY. O secret foi adicionado no GitHub, mas nao esta disponivel no ambiente local.
+
+GitHub Actions run 28058389107 no PR #1
+O workflow leu `OPENAI_API_KEY` do GitHub Secrets e chegou a chamar a API OpenAI. A execucao falhou por quota da conta/projeto OpenAI: HTTP 429 `insufficient_quota`. Exemplo registrado no job `nota-de-triagem/promptfooconfig.yaml`: `Quota exceeded: HTTP 429 Too Many Requests (code: insufficient_quota). Retries will not help — check your billing or daily quota.`
 ```
 
 Ajustes feitos apos a execucao:
