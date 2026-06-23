@@ -1,0 +1,14 @@
+{
+  "name": "playbook-de-ia-operacional",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=20.20.0"
+  },
+  "scripts": {
+    "eval": "for f in */promptfooconfig.yaml; do npx promptfoo@latest eval -c \"$f\" || exit 1; done"
+  },
+  "devDependencies": {
+    "promptfoo": "latest"
+  }
+}

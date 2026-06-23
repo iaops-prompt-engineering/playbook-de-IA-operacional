@@ -1,0 +1,73 @@
+name: Promptfoo Evaluation
+
+on:
+  pull_request:
+    paths:
+      - "triagem-de-pods/**"
+      - "nota-de-triagem/**"
+      - "networkpolicy-sentinel/**"
+      - "causa-raiz/**"
+      - "backpressure-relay/**"
+      - "migracao-forge-event-driven/**"
+      - "docs/**"
+      - ".github/workflows/promptfoo.yml"
+      - "package.json"
+  push:
+    branches:
+      - main
+    paths:
+      - "triagem-de-pods/**"
+      - "nota-de-triagem/**"
+      - "networkpolicy-sentinel/**"
+      - "causa-raiz/**"
+      - "backpressure-relay/**"
+      - "migracao-forge-event-driven/**"
+      - "docs/**"
+      - ".github/workflows/promptfoo.yml"
+      - "package.json"
+
+jobs:
+  evaluate:
+    name: ${{ matrix.prompt }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    strategy:
+      fail-fast: false
+      matrix:
+        prompt:
+          - triagem-de-pods/promptfooconfig.yaml
+          - nota-de-triagem/promptfooconfig.yaml
+          - networkpolicy-sentinel/promptfooconfig.yaml
+          - causa-raiz/promptfooconfig.yaml
+          - backpressure-relay/promptfooconfig.yaml
+          - migracao-forge-event-driven/promptfooconfig.yaml
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Cache promptfoo evaluations
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.promptfoo/cache
+            .promptfoo-cache
+          key: ${{ runner.os }}-promptfoo-${{ hashFiles('**/prompt.md', '**/promptfooconfig.yaml') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-promptfoo-${{ hashFiles('**/prompt.md', '**/promptfooconfig.yaml') }}-
+            ${{ runner.os }}-promptfoo-
+
+      - name: Run promptfoo evaluation
+        uses: promptfoo/promptfoo-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          config: ${{ matrix.prompt }}
+          cache-path: .promptfoo-cache
+          fail-on-threshold: 100
+          max-concurrency: 2
+          no-share: true

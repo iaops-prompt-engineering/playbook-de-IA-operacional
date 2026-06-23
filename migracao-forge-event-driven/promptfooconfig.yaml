@@ -1,0 +1,18 @@
+description: migracao-forge-event-driven llm-as-judge gate
+prompts:
+  - file://migracao-forge-event-driven/prompt.md
+providers:
+  - openai:gpt-4o-mini
+tests:
+  - vars:
+      estado_forge: |
+        Forge hoje: cron a cada 60min, job forge-batch-ingest; transformacao em 14 etapas Spark, 40min; destino em tabelas no warehouse particionadas por hora; falha acumula volume dobrado; dependentes Sentinel, Cerebro e billing.
+        Migracao deve consumir Relay continuamente, processar pequenos blocos, manter dependentes funcionando, evitar big-bang e permitir rollback.
+    assert:
+      - type: llm-rubric
+        value: |
+          A resposta deve estar dividida em tres elos, diagnosticar antes de propor, descrever migracao incremental sem big-bang, manter dependentes funcionando, incluir rollback/validacoes e explicitar lacunas. Reprove respostas monoliticas ou irreversiveis.
+      - type: latency
+        threshold: 5000
+      - type: cost
+        threshold: 0.01

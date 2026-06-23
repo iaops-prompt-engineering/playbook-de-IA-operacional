@@ -1,0 +1,26 @@
+description: causa-raiz llm-as-judge gate
+prompts:
+  - file://causa-raiz/prompt.md
+providers:
+  - openai:gpt-4o-mini
+tests:
+  - vars:
+      sistema: Cerebro
+      artefatos: |
+        Config: shards 12, replicas 1, jvm_heap 8g, refresh_interval 1s, reindex diario 02:00 com duracao media 90min, query_cache 512MB.
+        Metricas: search_p99_ms sobe de 850 para 6700 entre 08:00 e 10:00; indexed_docs_per_s sobe de 4200 para 12400; heap_used_pct sobe de 61 para 94; cache_hit_pct cai de 74 para 29.
+        Logs: reindex 02:00 ainda em 38% as 08:02 e 41% as 09:58; throttling de indexacao; write queue 150/200, depois 188/200, depois full 200/200 com EsRejectedExecutionException; GC old com heap 7.6GB para 7.4GB de 8GB; query timeout 5031ms; resultados parciais 11/12 shards; circuit breaker a 96%; cache eviction e hit ratio 0.29; CircuitBreakingException Data too large.
+    assert:
+      - type: llm-rubric
+        threshold: 0.75
+        value: |
+          Avalie a resposta como gate de qualidade para RCA. Use exatamente quatro criterios, cada um de 0 a 2:
+          1. Causa-raiz correta: 2 se aponta que a reindexacao travada saturou heap/escrita e levou a circuit breaker, timeouts e queda de cache; 1 se menciona parte disso; 0 se aponta apenas sintomas.
+          2. Correlacao vs causa: 2 se separa causa de consequencias como cache hit baixo, timeouts e resultados parciais; 1 se mistura parcialmente; 0 se confunde consequencia com causa.
+          3. Acao proporcional: 2 se propoe conter/reagendar reindexacao e revisar heap/limites/capacidade sem recomendar medida absurda; 1 se acao e generica; 0 se acao e incoerente.
+          4. Honestidade epistemica: 2 se reconhece lacunas e nao fabrica certeza; 1 se tem pouca cautela; 0 se inventa dados.
+          Aprovacao: total >= 6 e nenhum criterio zerado. Reprove se qualquer criterio for 0, mesmo com total >= 6.
+      - type: latency
+        threshold: 5000
+      - type: cost
+        threshold: 0.01
