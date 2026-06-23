@@ -39,16 +39,19 @@ npm install --save-dev node@22 promptfoo@latest
 Instalou Node local v22.23.0 e promptfoo 0.121.17 dentro do repositorio.
 
 HOME=$PWD/.home ./node_modules/.bin/node ./node_modules/.bin/promptfoo eval -c nota-de-triagem/promptfooconfig.yaml --no-progress-bar
-Falha antes das chamadas de modelo: Missing OPENAI_API_KEY e Missing ANTHROPIC_API_KEY.
+Falha antes das chamadas de modelo: Missing OPENAI_API_KEY e Missing ANTHROPIC_API_KEY. Depois foi decidido executar os testes apenas com OpenAI.
 
 HOME=$PWD/.home ./node_modules/.bin/node ./node_modules/.bin/promptfoo eval -c triagem-de-pods/promptfooconfig.yaml --no-progress-bar
-Falha antes das chamadas de modelo: Missing OPENAI_API_KEY e Missing ANTHROPIC_API_KEY.
+Falha antes das chamadas de modelo: Missing OPENAI_API_KEY e Missing ANTHROPIC_API_KEY. Depois foi decidido executar os testes apenas com OpenAI.
 
 HOME=$PWD/.home ./node_modules/.bin/node ./node_modules/.bin/promptfoo eval -c networkpolicy-sentinel/promptfooconfig.yaml --no-progress-bar
-Falha antes das chamadas de modelo: Missing OPENAI_API_KEY e Missing ANTHROPIC_API_KEY.
+Falha antes das chamadas de modelo: Missing OPENAI_API_KEY e Missing ANTHROPIC_API_KEY. Depois foi decidido executar os testes apenas com OpenAI.
 
 npm run eval:deterministic
-Usou Node local via `node_modules/.bin` e falhou no primeiro config antes das chamadas de modelo: Missing OPENAI_API_KEY e Missing ANTHROPIC_API_KEY.
+Usou Node local via `node_modules/.bin` e falhou no primeiro config antes das chamadas de modelo: Missing OPENAI_API_KEY e Missing ANTHROPIC_API_KEY. Depois foi decidido executar os testes apenas com OpenAI.
+
+npm run eval:deterministic apos remover Anthropic dos configs ativos
+Falha antes das chamadas de modelo: Missing OPENAI_API_KEY. O secret foi adicionado no GitHub, mas nao esta disponivel no ambiente local.
 ```
 
 Ajustes feitos apos a execucao:
@@ -57,12 +60,12 @@ Ajustes feitos apos a execucao:
 - Corrigidos os rotulos de `nota-de-triagem` para `HIPÓTESE INICIAL:` e `AÇÃO IMEDIATA:`, exatamente como no enunciado.
 - Adicionado Node local v22 via dependencia de desenvolvimento para nao depender do Node do sistema.
 
-Resultado esperado em ambiente com `OPENAI_API_KEY` e `ANTHROPIC_API_KEY` configuradas:
+Resultado esperado em ambiente com `OPENAI_API_KEY` configurada:
 
 ```text
-nota-de-triagem: PASS em 6/6 chamadas (3 testes x 2 providers)
-triagem-de-pods: PASS em 6/6 chamadas (3 testes x 2 providers)
-networkpolicy-sentinel: PASS em 2/2 chamadas (1 teste x 2 providers)
+nota-de-triagem: PASS em 3/3 chamadas (3 testes x 1 provider)
+triagem-de-pods: PASS em 3/3 chamadas (3 testes x 1 provider)
+networkpolicy-sentinel: PASS em 1/1 chamada (1 teste x 1 provider)
 ```
 
 Curadoria: os asserts sao intencionalmente sobre propriedades verificaveis. Nao avaliam qualidade profunda, que fica para juiz no CP09 e CP10.
@@ -102,7 +105,7 @@ Estrategia escolhida:
 - Deterministicos falham por assert objetivo.
 - Prompts abertos falham por LLM-as-judge quando a rubrica reprova.
 - Cache do promptfoo habilitado para reduzir custo e latencia.
-- Chaves em GitHub Secrets: `OPENAI_API_KEY` e `ANTHROPIC_API_KEY`.
+- Chave em GitHub Secrets: `OPENAI_API_KEY`.
 
 Comparacao de alternativas:
 
