@@ -13,7 +13,7 @@ tests:
     assert:
       - type: llm-rubric
         value: |
-          A resposta deve ser um plano executavel e reversivel, com passos, rollback, riscos residuais e criterios de sucesso. Reprove respostas que permaneçam apenas em nivel estrategico ou que omitirem rollback.
+          A resposta deve ser um plano executavel e reversivel, com fases ou passos claros, rollback, riscos residuais, criterios de sucesso e um resumo final pronto para execucao. Reprove respostas que permaneçam apenas em nivel estrategico ou que omitirem rollback.
       - type: latency
         threshold: 5000
       - type: cost

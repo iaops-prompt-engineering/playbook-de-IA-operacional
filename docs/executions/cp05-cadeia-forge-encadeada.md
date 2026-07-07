@@ -2,6 +2,15 @@
 
 O prompt foi separado em tres elos independentes, e a saida de cada etapa passa a ser a entrada real da seguinte.
 
+O exercicio nao pede apenas separacao estrutural. Ele pede uma cadeia em que o diagnostico alimenta a estrategia, a estrategia alimenta o plano e cada elo registra sua propria saida de forma reutilizavel.
+
+## Intencao do CP05
+
+- Evitar um prompt monolitico que tenta resolver diagnostico, estrategia e plano ao mesmo tempo.
+- Fazer a analise amadurecer em camadas.
+- Preservar rastreabilidade entre entrada, saida e proxima etapa.
+- Registrar o output de cada elo de forma clara para auditoria e reuso.
+
 ## Elo 1 - Diagnostico
 
 Entrada usada: descricao do Forge atual, dependencias e garantias exigidas.
@@ -17,6 +26,10 @@ LACUNAS:
 ENTRADA PARA O ELO 2:
 Forge opera hoje em batch horario com 14 etapas Spark, depende de tabelas particionadas por hora e nao pode quebrar Sentinel, Cerebro nem billing durante a transicao. A migracao precisa manter compatibilidade de contrato, tratar o acoplamento temporal como risco principal e reconhecer lacunas de volume, late events e leitura dual.
 ```
+
+Observacao:
+- Este elo precisa capturar o estado atual com precisao suficiente para sustentar decisao posterior.
+- O valor dele nao e sugerir solucao, e sim produzir base confiavel para a estrategia.
 
 ## Elo 2 - Estrategia
 
@@ -34,6 +47,10 @@ PONTOS DE REVERSAO:
 ENTRADA PARA O ELO 3:
 A estrategia escolhida e dual-run: consumir o Relay continuamente em microbatches, escrever saida paralela compatível por hora, comparar com batch antes de promover a nova trilha e manter billing no batch ate o fechamento de consistencia. O rollback precisa permitir voltar a leitura batch sem perda de continuidade, e a migracao de consumidores depende de parity de schema, volume, atraso e checksums.
 ```
+
+Observacao:
+- Aqui a saida deve mostrar porque a estrategia incremental e a melhor resposta para o contexto.
+- Alternativas nao precisam virar tese longa, mas devem aparecer o suficiente para justificar a escolha.
 
 ## Elo 3 - Plano executavel
 
@@ -64,3 +81,13 @@ CRITERIOS DE SUCESSO:
 - Checksums e reconciliacao sem divergencias materiais por janela.
 - Billing validado no ciclo noturno antes de abandonar o batch.
 ```
+
+Observacao:
+- Este elo precisa ser o mais operacional dos tres.
+- Se o plano nao puder virar backlog ou runbook, ele ainda esta abstrato demais.
+
+## O que foi reforcado nesta versao
+
+- Elo 1 ganhou inventario de invariantes, lacunas e criterios para alimentar o proximo passo.
+- Elo 2 ganhou exigencia de analise de alternativas, pontos de reversao e premissas.
+- Elo 3 ganhou estrutura de fases, criterios observaveis e resumo final pronto para execucao.
