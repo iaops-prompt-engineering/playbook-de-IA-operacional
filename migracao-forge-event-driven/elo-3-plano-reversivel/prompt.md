@@ -22,20 +22,26 @@ Entrada real do Elo 2:
 
 Objetivo do Elo 3:
 - Transformar a estrategia em um plano operacional, executavel e reversivel.
-- Incluir passos, validacoes, feature flags ou dual-run quando aplicavel.
-- Registrar criterios de sucesso, rollback e riscos residuais.
+- Estruturar o rollout em etapas numeradas com validacoes, portas de decisao e criterios de passagem.
+- Incluir shadow mode, dual-run, feature flags ou reconcilicao apenas quando fizer sentido para a estrategia recebida.
+- Registrar rollback, riscos residuais, criterios de sucesso e o que precisa acontecer para a migracao ser considerada segura.
 
 Regras:
 - Nao reabra a analise de causa; assuma o diagnostico e a estrategia como dados de entrada reais.
 - O plano precisa ser compatível com Sentinel, Cerebro e billing em funcionamento durante a transicao.
 - Preserve compatibilidade de tabelas particionadas por hora ate os consumidores migrarem.
+- Nao esconda riscos operacionais, dependencias ou pontos de corte.
 - Se faltar algum dado, explicite a lacuna em vez de inventar uma decisao.
+- A saida precisa ser detalhada o bastante para orientar execucao tecnica e acompanhamento de rollout.
 
 Formato de saida:
 
 ```text
 ELO 3 - PLANO EXECUTAVEL:
-<passos, validacoes e rollout>
+<passos operacionais, validacoes e rollout>
+
+FASES:
+<quebrar o plano em fases claras, com objetivo e criterio de saida>
 
 ROLLBACK:
 <como voltar para batch>
@@ -45,4 +51,7 @@ RISCOS RESIDUAIS:
 
 CRITERIOS DE SUCESSO:
 <condicoes observaveis para considerar a migracao segura>
+
+ENTRADA FINAL PARA EXECUCAO:
+<resumo curto do plano pronto para virar backlog ou runbook>
 ```

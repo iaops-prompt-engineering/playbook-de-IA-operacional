@@ -12,7 +12,7 @@ tests:
     assert:
       - type: llm-rubric
         value: |
-          A resposta deve propor migracao incremental, sem big-bang, com convivencia entre batch e event-driven. Precisa explicitar pontos de reversao e nao pode reabrir o diagnostico inteiro nem virar plano executavel prematuro.
+          A resposta deve propor migracao incremental, comparar alternativas quando isso ajudar na decisao, explicitar pontos de reversao e entregar uma entrada consistente para o Elo 3. Reprove respostas que reabram o diagnostico inteiro ou virem plano executavel prematuro.
       - type: latency
         threshold: 5000
       - type: cost

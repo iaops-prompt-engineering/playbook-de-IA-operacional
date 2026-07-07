@@ -11,7 +11,7 @@ tests:
     assert:
       - type: llm-rubric
         value: |
-          A resposta deve diagnosticar o estado atual do Forge, listar dependencias, riscos e invariantes, e evitar propor a migracao inteira no mesmo texto. Reprove respostas que misturem estrategia e plano executavel no Elo 1.
+          A resposta deve diagnosticar o estado atual do Forge, listar dependencias, invariantes, riscos e lacunas, e produzir uma entrada clara para o Elo 2. Reprove respostas que misturem estrategia ou plano executavel no Elo 1.
       - type: latency
         threshold: 5000
       - type: cost
