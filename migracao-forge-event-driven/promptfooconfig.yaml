@@ -1,4 +1,4 @@
-description: migracao-forge-event-driven llm-as-judge gate
+description: migracao-forge-event-driven elo 1 diagnostic gate
 prompts:
   - file://migracao-forge-event-driven/prompt.md
 providers:
@@ -7,11 +7,11 @@ tests:
   - vars:
       estado_forge: |
         Forge hoje: cron a cada 60min, job forge-batch-ingest; transformacao em 14 etapas Spark, 40min; destino em tabelas no warehouse particionadas por hora; falha acumula volume dobrado; dependentes Sentinel, Cerebro e billing.
-        Migracao deve consumir Relay continuamente, processar pequenos blocos, manter dependentes funcionando, evitar big-bang e permitir rollback.
+        O objetivo do Elo 1 e diagnosticar o estado atual, apontar invariantes, riscos e lacunas, sem propor ainda a estrategia de migracao.
     assert:
       - type: llm-rubric
         value: |
-          A resposta deve estar dividida em tres elos, diagnosticar antes de propor, descrever migracao incremental sem big-bang, manter dependentes funcionando, incluir rollback/validacoes e explicitar lacunas. Reprove respostas monoliticas ou irreversiveis.
+          A resposta deve diagnosticar o estado atual do Forge, listar dependencias, riscos e invariantes, e evitar propor a migracao inteira no mesmo texto. Reprove respostas que misturem estrategia e plano executavel no Elo 1.
       - type: latency
         threshold: 5000
       - type: cost

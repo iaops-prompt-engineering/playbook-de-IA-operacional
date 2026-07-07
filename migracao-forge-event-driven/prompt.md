@@ -1,6 +1,6 @@
 ---
-nome: migracao-forge-event-driven
-descricao: Cadeia de prompts para migrar o Forge de batch para processamento orientado a eventos.
+nome: migracao-forge-event-driven-elo-1-diagnostico
+descricao: Diagnostico do estado atual do Forge antes da migracao para event-driven.
 versao: 1.0.0
 tags:
   - devops
@@ -12,34 +12,23 @@ inputs:
     descricao: Estado atual do Forge, dependencias, fragilidades e garantias exigidas para a migracao.
 ---
 
-Voce vai conduzir uma cadeia de prompts para planejar a migracao do Forge de batch para processamento orientado a eventos.
+Voce vai produzir apenas o Elo 1 da cadeia de migracao do Forge.
 
-Entrada inicial:
+Entrada:
 
 ```text
 {{estado_forge}}
 ```
 
-Execute internamente tres elos e apresente a saida consolidada por elo. Cada elo deve usar a saida do elo anterior como entrada conceitual.
-
-ELO 1 - Diagnostico do estado atual:
-- Mapear fluxo atual, dependencias, gargalos, riscos e invariantes que nao podem quebrar.
-- Nao propor solucao ainda alem de observacoes necessarias.
-
-ELO 2 - Estrategia de migracao:
-- Usar o diagnostico do Elo 1.
-- Propor etapas incrementais, sem big-bang, com convivencia entre batch e event-driven.
-- Explicitar pontos de reversao.
-
-ELO 3 - Plano executavel e reversivel:
-- Usar a estrategia do Elo 2.
-- Transformar em plano operacional com passos, validacoes, feature flags ou dual-run quando aplicavel.
-- Incluir criterios de sucesso, rollback e riscos residuais.
+Objetivo do Elo 1:
+- Mapear o fluxo atual do Forge, dependencias, gargalos, riscos e invariantes que nao podem quebrar.
+- Nao propor a solucao ainda, alem das observacoes necessarias para sustentar a estrategia.
+- Preparar a entrada real para o Elo 2, sem resumir demais nem misturar recomendacoes de migracao.
 
 Regras:
-- Mantenha Sentinel, Cerebro e billing funcionando durante a transicao.
-- Preserve compatibilidade das tabelas particionadas por hora ate que consumidores migrem.
-- Nao invente ferramentas especificas nao citadas se uma formulacao generica bastar.
+- Mantenha Sentinel, Cerebro e billing funcionando durante a transicao, mas trate isso como restricao do contexto, nao como plano do Elo 1.
+- Preserve a compatibilidade das tabelas particionadas por hora ate que os consumidores migrem.
+- Nao invente ferramentas especificas se uma formulacao generica bastar.
 - Se uma decisao depender de dado ausente, marque como premissa ou lacuna.
 
 Formato de saida:
@@ -48,12 +37,9 @@ Formato de saida:
 ELO 1 - DIAGNOSTICO:
 <diagnostico estruturado>
 
-ELO 2 - ESTRATEGIA:
-<etapas incrementais e reversiveis>
+LACUNAS:
+<dados ausentes que impactam a migracao>
 
-ELO 3 - PLANO EXECUTAVEL:
-<passos, validacoes, rollback e riscos>
-
-CURADORIA DE CADEIA:
-<por que a decomposicao evita resposta rasa>
+ENTRADA PARA O ELO 2:
+<texto que sera usado como input real do Elo 2>
 ```
