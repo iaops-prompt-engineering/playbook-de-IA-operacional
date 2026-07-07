@@ -1,0 +1,20 @@
+description: migracao-forge-event-driven elo 3 executable plan gate
+prompts:
+  - file://migracao-forge-event-driven/elo-3-plano-reversivel/prompt.md
+providers:
+  - openai:gpt-4o-mini
+tests:
+  - vars:
+      estrategia_forge: |
+        A melhor abordagem e uma migracao por dual-run. O Forge deve consumir o Relay continuamente em microbatches enquanto o batch atual continua sendo a fonte oficial. Em paralelo, a nova trilha event-driven grava saidas equivalentes em tabelas paralelas, mantendo a particionagem horaria. Sentinel e Cerebro podem migrar por feature flag depois da reconciliacao, enquanto billing permanece no batch ate o fechamento de consistencia.
+        Desligar o consumidor novo e voltar a ler apenas as tabelas batch.
+        Manter o batch como fonte oficial ate que checksums, volume e atraso estejam equivalentes.
+        Interromper a migracao de consumidores se houver divergencia de schema ou ordering.
+    assert:
+      - type: llm-rubric
+        value: |
+          A resposta deve ser um plano executavel e reversivel, com passos, rollback, riscos residuais e criterios de sucesso. Reprove respostas que permaneçam apenas em nivel estrategico ou que omitirem rollback.
+      - type: latency
+        threshold: 5000
+      - type: cost
+        threshold: 0.01

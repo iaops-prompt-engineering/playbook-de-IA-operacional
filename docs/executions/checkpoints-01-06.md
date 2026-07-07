@@ -167,31 +167,9 @@ Curadoria: usei decision matrix. O ajuste foi exigir descartes para evitar recom
 
 Modelo usado: GPT-4o para planejamento encadeado. Dados reais a sanitizar: nomes de jobs, tabelas, tenants e janelas de billing.
 
-Saida:
+A versao monolitica foi substituida por uma cadeia real de tres prompts separados. O registro detalhado da separacao e dos outputs de cada elo esta em `docs/executions/cp05-cadeia-forge-encadeada.md`.
 
-```text
-ELO 1 - DIAGNOSTICO:
-O Forge atual acumula dados por 60min e executa 14 etapas Spark em ~40min, gravando tabelas por hora. A fragilidade principal e o acoplamento temporal: falha de um lote dobra o volume seguinte. Dependentes esperam tabelas agregadas e particionadas, entao a compatibilidade de contrato e invariante.
-
-ELO 2 - ESTRATEGIA:
-Migrar por dual-run. Primeiro consumir do Relay continuamente em microbatches sem publicar como fonte oficial. Depois escrever tabelas paralelas compatíveis por hora. Comparar resultados contra batch, migrar Sentinel e Cerebro por feature flag e manter billing no batch ate fechamento de consistencia. Cada etapa tem rollback para leitura batch.
-
-ELO 3 - PLANO EXECUTAVEL:
-1. Definir contrato de evento e idempotencia.
-2. Criar consumidor Forge event-driven em shadow mode.
-3. Gravar saida paralela com mesma particao horaria.
-4. Rodar reconciliacao batch vs event-driven por volume, atraso e checksums.
-5. Migrar Sentinel com feature flag e rollback para batch.
-6. Migrar Cerebro apos estabilidade de schema.
-7. Migrar billing por ultimo, mantendo validacao noturna.
-Rollback: desligar consumidor novo e apontar dependentes para tabelas batch.
-Riscos: duplicidade, ordering, late events e divergencia de agregacao.
-
-CURADORIA DE CADEIA:
-A cadeia evita resposta rasa porque primeiro fixa invariantes, depois escolhe estrategia e so entao detalha execucao reversivel.
-```
-
-Curadoria: usei prompt chaining em tres elos. O principal refinamento foi preservar billing por ultimo, porque ele tem janela diferente e impacto financeiro.
+Curadoria: a decomposicao agora faz o Elo 1 parar no diagnostico, o Elo 2 transformar esse diagnostico em estrategia incremental e o Elo 3 consolidar o plano reversivel. Isso evita a resposta rasa que misturava analise, estrategia e rollout numa unica chamada.
 
 ## CP06 - networkpolicy-sentinel
 
