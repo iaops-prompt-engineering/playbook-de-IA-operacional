@@ -1,6 +1,6 @@
 description: causa-raiz llm-as-judge gate
 prompts:
-  - file://devops/causa-raiz/prompt.md
+  - file://prompt.md
 providers:
   - openai:gpt-4o-mini
 tests:
