@@ -11,6 +11,15 @@ O exercicio nao pede apenas separacao estrutural. Ele pede uma cadeia em que o d
 - Preservar rastreabilidade entre entrada, saida e proxima etapa.
 - Registrar o output de cada elo de forma clara para auditoria e reuso.
 
+Promptos da cadeia:
+- Elo 1: `devops/migracao-forge-event-driven/prompt.md`
+- Elo 2: `devops/migracao-forge-event-driven/elo-2-estrategia/prompt.md`
+- Elo 3: `devops/migracao-forge-event-driven/elo-3-plano-reversivel/prompt.md`
+
+Modelo usado na execucao curada:
+- GPT-4o mini em cada elo, para manter custo baixo sem perder estrutura.
+- Escalada recomendada para GPT-4o quando houver artefatos adicionais, dependencia de schemas reais ou mais restricoes de rollout.
+
 ## Elo 1 - Diagnostico
 
 Entrada usada: descricao do Forge atual, dependencias e garantias exigidas.
@@ -30,6 +39,7 @@ Forge opera hoje em batch horario com 14 etapas Spark, depende de tabelas partic
 Observacao:
 - Este elo precisa capturar o estado atual com precisao suficiente para sustentar decisao posterior.
 - O valor dele nao e sugerir solucao, e sim produzir base confiavel para a estrategia.
+- Curadoria do Elo 1: separar acoplamento atual, contratos que nao podem quebrar e lacunas que impedem salto direto para rollout.
 
 ## Elo 2 - Estrategia
 
@@ -51,6 +61,7 @@ A estrategia escolhida e dual-run: consumir o Relay continuamente em microbatche
 Observacao:
 - Aqui a saida deve mostrar porque a estrategia incremental e a melhor resposta para o contexto.
 - Alternativas nao precisam virar tese longa, mas devem aparecer o suficiente para justificar a escolha.
+- Curadoria do Elo 2: fixar dual-run como estrategia por permitir convivencia, reconciliacao e reversao, sem cair em big-bang.
 
 ## Elo 3 - Plano executavel
 
@@ -85,9 +96,17 @@ CRITERIOS DE SUCESSO:
 Observacao:
 - Este elo precisa ser o mais operacional dos tres.
 - Se o plano nao puder virar backlog ou runbook, ele ainda esta abstrato demais.
+- Curadoria do Elo 3: transformar estrategia em gates, fases e rollback pratico, em vez de lista vaga de boas intencoes.
 
 ## O que foi reforcado nesta versao
 
 - Elo 1 ganhou inventario de invariantes, lacunas e criterios para alimentar o proximo passo.
 - Elo 2 ganhou exigencia de analise de alternativas, pontos de reversao e premissas.
 - Elo 3 ganhou estrutura de fases, criterios observaveis e resumo final pronto para execucao.
+
+Dados a tratar antes de modelo externo:
+- nomes de jobs e pipelines internos
+- nomes reais de tabelas, schemas e topicos
+- tenants e dados de billing
+- janelas de fechamento financeiro
+- qualquer identificador interno de consumidor, cluster ou ambiente

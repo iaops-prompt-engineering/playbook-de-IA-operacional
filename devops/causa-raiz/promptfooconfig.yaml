@@ -1,0 +1,49 @@
+description: causa-raiz llm-as-judge gate
+prompts:
+  - file://devops/causa-raiz/prompt.md
+providers:
+  - openai:gpt-4o-mini
+tests:
+  - vars:
+      sistema: Cerebro
+      artefatos: |
+        Config: shards 12, replicas 1, jvm_heap 8g, refresh_interval 1s, reindex diario 02:00 com duracao media 90min, query_cache 512MB.
+        Metricas: search_p99_ms sobe de 850 para 6700 entre 08:00 e 10:00; indexed_docs_per_s sobe de 4200 para 12400; heap_used_pct sobe de 61 para 94; cache_hit_pct cai de 74 para 29.
+        Logs: reindex 02:00 ainda em 38% as 08:02 e 41% as 09:58; throttling de indexacao; write queue 150/200, depois 188/200, depois full 200/200 com EsRejectedExecutionException; GC old com heap 7.6GB para 7.4GB de 8GB; query timeout 5031ms; resultados parciais 11/12 shards; circuit breaker a 96%; cache eviction e hit ratio 0.29; CircuitBreakingException Data too large.
+    assert:
+      - type: regex
+        value: "(reindex[açc][aã]o|reindex)"
+      - type: regex
+        value: "(circuit breaker|CircuitBreakingException|breaker)"
+      - type: regex
+        value: "(cache hit|cache_hit_pct|cache)"
+      - type: regex
+        value: "(SANITIZACAO ANTES DE MODELO EXTERNO|SANITIZAÇÃO ANTES DE MODELO EXTERNO)"
+      - type: llm-rubric
+        threshold: 0.75
+        value: |
+          Avalie a resposta como gate de qualidade para analise de causa-raiz. Use exatamente estes quatro criterios, cada um na escala 0, 1 ou 2:
+          1. Causa-raiz correta
+             - 2: aponta a causa real: reindexacao travada saturando heap e escrita, levando a circuit breaker, timeouts de busca e queda do cache.
+             - 1: menciona parte da cadeia causal, mas de forma incompleta.
+             - 0: descreve apenas sintomas ou aponta causa errada.
+          2. Correlacao x causa
+             - 2: separa claramente causa de consequencias, por exemplo cache hit baixo, timeouts e resultados parciais como efeitos.
+             - 1: faz separacao parcial, mas ainda mistura alguns efeitos com causa.
+             - 0: confunde consequencia com causa principal.
+          3. Acao proporcional
+             - 2: propoe acao coerente com o diagnostico, por exemplo conter ou reagendar reindexacao e rever heap, limites ou capacidade.
+             - 1: acao plausivel, mas generica ou incompleta.
+             - 0: acao incoerente, exagerada ou subdimensionada para o diagnostico.
+          4. Honestidade epistemica
+             - 2: reconhece o que os dados nao permitem concluir e nao fabrica certeza.
+             - 1: mostra alguma cautela, mas ainda exagera a certeza.
+             - 0: inventa dado, certeza ou mecanismo nao sustentado pelos artefatos.
+
+          Regra de aprovacao:
+          - aprove somente se a soma total for >= 6 de 8
+          - reprove automaticamente se qualquer criterio receber 0, mesmo com soma >= 6
+      - type: latency
+        threshold: 5000
+      - type: cost
+        threshold: 0.01

@@ -2,7 +2,11 @@
 
 ## CP01 - triagem-de-pods
 
-Modelo usado: GPT-4o mini para custo baixo e latencia adequada a plantao. Em dados reais, sanitizar tenants, hostnames, imagens privadas e tokens em logs antes de enviar a provedor externo.
+Prompt final: `devops/triagem-de-pods/prompt.md`
+
+Metodo: meta-prompting com ciclo gerar -> criticar -> refinar. Curadoria final manteve papel claro de SRE, proibiu repetir apenas `STATUS`, obrigou cruzamento de status + eventos + logs e fechou contrato de saida curto para plantao.
+
+Modelo usado na execucao curada: GPT-4o mini, escolhido por custo baixo e latencia adequada a plantao. Em dados reais, sanitizar tenants, hostnames, imagens privadas e tokens em logs antes de enviar a provedor externo.
 
 Saida para Entrada 1:
 
@@ -13,7 +17,10 @@ PODS PROBLEMATICOS:
 - POD: sentinel-api-7d9c8b6f4-h4m2t
   STATUS OBSERVADO: CrashLoopBackOff, 14 restarts em 42m.
   CAUSA PROVAVEL: OOMKilled por heap chegando ao limite de 512Mi durante carga do cache.
-  EVIDENCIAS: Last State OOMKilled; exit code 137; limite de memoria 512Mi; logs mostram heap 498Mi/512Mi e fatal out of memory.
+  EVIDENCIAS:
+  - Last State OOMKilled com exit code 137.
+  - Limite de memoria do container em 512Mi.
+  - Logs mostram heap 498Mi/512Mi e fatal out of memory logo antes da queda.
   ACAO DO PLANTAO: reduzir carga/cache ou aumentar limite de memoria de forma controlada e abrir follow-up para revisar consumo da versao 2.9.1.
 ```
 
@@ -26,12 +33,18 @@ PODS PROBLEMATICOS:
 - POD: sentinel-api-7d9c8b6f4-zzp10
   STATUS OBSERVADO: ImagePullBackOff.
   CAUSA PROVAVEL: tag registry.aegis.io/sentinel-api:2.9.2 ausente ou nao publicada.
-  EVIDENCIAS: evento "manifest unknown"; ErrImagePull; back-off pulling image.
+  EVIDENCIAS:
+  - Evento "manifest unknown" ao tentar baixar `registry.aegis.io/sentinel-api:2.9.2`.
+  - Evento `ErrImagePull`.
+  - Kubelet entrou em back-off para nova tentativa de pull.
   ACAO DO PLANTAO: pausar rollout e corrigir tag/publicacao da imagem antes de retomar.
 - POD: sentinel-ingest-8f7a9c5b-4dkqm
   STATUS OBSERVADO: Pending.
   CAUSA PROVAVEL: scheduler nao encontrou CPU suficiente para request de 2 CPUs.
-  EVIDENCIAS: FailedScheduling; 0/6 nodes available; 6 Insufficient cpu.
+  EVIDENCIAS:
+  - Evento `FailedScheduling`.
+  - Scheduler reporta `0/6 nodes are available`.
+  - Motivo objetivo: `6 Insufficient cpu`.
   ACAO DO PLANTAO: reduzir request se seguro ou liberar/aumentar capacidade antes de reexecutar o deploy.
 ```
 
@@ -43,11 +56,24 @@ PODS PROBLEMATICOS: nenhum.
 ACAO DO PLANTAO: manter monitoramento normal; o restart unico do worker ocorreu ha 3 dias e nao indica falha ativa.
 ```
 
-Curadoria: usei estrutura Role + Task + Evidence + Output Contract. O refinamento principal foi proibir repetir somente o `STATUS` e exigir cruzamento com eventos e logs.
+Curadoria:
+- Estrutura usada: Role + Objective + Rules + Output Contract.
+- Refinamento principal: separar "pod problematico" de "restart antigo sem falha ativa".
+- Ganho real: reduzir resposta vaga do tipo "CrashLoopBackOff = problema" e forcar inferencia apoiada em evidencia operacional.
+- Limite assumido: sem snapshot de describe/logs suficientes, o prompt deve responder "indeterminada com os dados fornecidos", nao inventar causa.
 
 ## CP02 - nota-de-triagem
 
-Modelo usado: Claude Haiku como segundo provedor de baixo custo para tarefa de reformatacao. A escolha metodologica foi few-shot implícito por contrato de formato, sem colar exemplos no prompt final para reduzir tokens e evitar mistura entre exemplos de formato e entradas cruas.
+Prompt final: `devops/nota-de-triagem/prompt.md`
+
+Metodo: meta-prompting com ciclo gerar -> criticar -> refinar. Escolha metodologica: ensinar por contrato fixo de saida e regras curtas, sem few-shot literal no prompt final.
+
+Justificativa:
+- Este checkpoint separa dois blocos: referencia de formato e alertas crus.
+- Few-shot literal com exemplos completos aumenta risco de o modelo vazar conteudo do exemplo para a nota final.
+- Contrato fixo com cinco rotulos reduz tokens, aumenta estabilidade e deixa o teste deterministico mais simples.
+
+Modelo usado na execucao curada: GPT-4o mini. Claude Haiku segue como segundo provedor opcional de baixo custo para comparar consistencia de formatacao.
 
 Saida para Entrada 1:
 
@@ -79,11 +105,24 @@ ACAO IMEDIATA: verificar job anterior, liberar/reexecutar batch e acompanhar lag
 ESCALAR PARA: @data-platform se lag nao estabilizar em 20min
 ```
 
-Curadoria: o prompt fixa rotulos, ordem, limite de linhas e handles. O ajuste foi tornar `ESCALAR PARA` regex-friendly e curto para testes determinísticos.
+Curadoria:
+- Estrutura usada: Output Contract + Constraints + Escalation Mapping.
+- Refinamento principal: explicitar que exemplos de formato nao sao dados da entrada atual.
+- Ganho real: evitar mistura entre notas-modelo e alerta cru, problema comum quando o prompt aprende estilo por proximidade textual.
+- Limite assumido: se alerta vier pobre em contexto, impacto e hipotese podem ficar mais conservadores, mas sem inventar fatos.
 
 ## CP03 - causa-raiz
 
-Modelo usado: GPT-4o para raciocinio melhor em artefatos longos. Dados a sanitizar: nomes de indices, nodes, tenants, horarios finos, repositorios internos e qualquer identificador de cluster.
+Prompt final: `devops/causa-raiz/prompt.md`
+
+Metodo: meta-prompting com ciclo gerar -> criticar -> refinar. Escolha metodologica: usar roteiro explicito de cadeia causal, porque o pacote mistura configuracao, metricas e logs de fontes diferentes.
+
+Justificativa:
+- Sem roteiro, modelo tende a listar sintomas ou resumir cada artefato separado.
+- O contrato final obriga linha do tempo, correlacao entre fontes e separacao entre causa, mecanismo intermediario e consequencia.
+- Tambem obriga bloco de sanitizacao antes de mandar artefatos de producao para modelo externo.
+
+Modelo usado na execucao curada: GPT-4o mini para custo baixo. Escalada recomendada para GPT-4o quando artefatos ficarem maiores, mais ambíguos ou com mais hipoteses concorrentes.
 
 Saida:
 
@@ -119,11 +158,24 @@ SANITIZACAO ANTES DE MODELO EXTERNO:
 - Mascarar nomes de nodes, indices, tenants, hostnames, repositorios e qualquer dado de cliente em logs.
 ```
 
-Curadoria: usei chain-of-evidence e separacao causa/consequencia. O refinamento foi explicitar que cache hit baixo e timeout sao efeitos, nao causa primaria.
+Curadoria:
+- Estrutura usada: timeline -> causal chain -> consequences -> actions -> rejected hypotheses -> gaps -> sanitization.
+- Refinamento principal: explicitar que cache hit baixo, timeout e resultado parcial sao efeitos da pressao de heap/escrita, nao causa primaria.
+- Ganho real: impedir resposta rasa do tipo "Elasticsearch lento por heap alto" sem conectar reindex travada, fila de escrita, throttling, breaker e falha de shard.
+- Dados a tratar antes de modelo externo: nomes de nodes, indices, tenants, namespaces internos, hostnames, repositorios, IDs de task e qualquer dado de cliente nos logs.
 
 ## CP04 - backpressure-relay
 
-Modelo usado: Gemini Flash como opcao de baixo custo para comparacao de alternativas. Para dados reais, mascarar nomes de tenants e volumes sensiveis por cliente.
+Prompt final: `devops/backpressure-relay/prompt.md`
+
+Metodo: meta-prompting com ciclo gerar -> criticar -> refinar. Escolha metodologica: matriz curta de alternativas seguida de recomendacao combinada, porque este checkpoint exige comparacao e nao resposta unica precoce.
+
+Justificativa:
+- Existe mais de um caminho defensavel e cada um cobra custo, complexidade e impacto operacional diferentes.
+- Sem contrato de comparacao, modelo tende a escolher uma opcao cedo demais e esconder trade-offs.
+- O contrato final força restricoes inegociaveis, recomendacao, rollout, descartes e metricas de sucesso.
+
+Modelo usado na execucao curada: GPT-4o mini para custo baixo. Escalada recomendada para GPT-4o quando houver mais alternativas, dados de custo mais detalhados ou necessidade de sintese executiva mais refinada.
 
 Saida:
 
@@ -161,19 +213,48 @@ METRICAS DE SUCESSO:
 - zero perda de mensagens confirmada por contadores de ingestao e replay.
 ```
 
-Curadoria: usei decision matrix. O ajuste foi exigir descartes para evitar recomendacao unica sem trade-off.
+Curadoria:
+- Estrutura usada: restrictions -> alternatives matrix -> rollout -> discards -> success metrics.
+- Refinamento principal: forcar resposta combinada quando uma unica alavanca nao resolve SLA, custo e perda zero ao mesmo tempo.
+- Ganho real: impedir recomendacao rasa como "autoscale tudo" ou "priorize Sentinel" sem enfrentar backlog do Forge, custo trimestral e isolamento de tenant barulhento.
+- Dados a tratar antes de modelo externo: nomes de tenants, topologia interna do barramento, limites reais de capacidade, custos unitarios e qualquer identificador de cliente.
 
 ## CP05 - migracao-forge-event-driven
 
-Modelo usado: GPT-4o para planejamento encadeado. Dados reais a sanitizar: nomes de jobs, tabelas, tenants e janelas de billing.
+Prompts finais:
+- `devops/migracao-forge-event-driven/prompt.md`
+- `devops/migracao-forge-event-driven/elo-2-estrategia/prompt.md`
+- `devops/migracao-forge-event-driven/elo-3-plano-reversivel/prompt.md`
+
+Metodo: meta-prompting com ciclo gerar -> criticar -> refinar em tres elos encadeados. Escolha metodologica: separar diagnostico, estrategia e plano reversivel para evitar resposta monolitica rasa.
+
+Justificativa:
+- O problema mistura estado atual, convivencia temporaria entre batch e event-driven, migracao de dependentes e rollback.
+- Um unico prompt tende a misturar analise, decisao e execucao cedo demais.
+- A cadeia obriga passagem real da saida anterior para o proximo elo e deixa o raciocinio auditavel.
+
+Modelo usado na execucao curada: GPT-4o mini em cada elo para custo baixo. Escalada recomendada para GPT-4o quando houver schemas reais, metricas de volume ou mais consumidores.
 
 A versao monolitica foi substituida por uma cadeia real de tres prompts separados. O registro detalhado da separacao e dos outputs de cada elo esta em `docs/executions/cp05-cadeia-forge-encadeada.md`.
 
-Curadoria: a decomposicao agora faz o Elo 1 parar no diagnostico, o Elo 2 transformar esse diagnostico em estrategia incremental e o Elo 3 consolidar o plano reversivel. Isso evita a resposta rasa que misturava analise, estrategia e rollout numa unica chamada.
+Curadoria:
+- Elo 1 para no diagnostico e prepara entrada concreta para o Elo 2.
+- Elo 2 escolhe estrategia incremental, compara alternativas e registra pontos de reversao.
+- Elo 3 converte estrategia em fases, gates e rollback pratico.
+- Dados a tratar antes de modelo externo: nomes de jobs, tabelas, schemas, tenants, consumidores internos e janelas de billing.
 
 ## CP06 - networkpolicy-sentinel
 
-Modelo usado: Claude Sonnet para geracao YAML e critica de seguranca. Dados reais a sanitizar: namespaces internos, labels proprietarias e topologia sensivel.
+Prompt final: `devops/networkpolicy-sentinel/prompt.md`
+
+Metodo: meta-prompting com ciclo gerar -> criticar -> refinar. Escolha metodologica: registrar iteracoes explicitas v1 -> verificacao -> v2, porque manifesto de seguranca nao deve sair na primeira tentativa.
+
+Justificativa:
+- O manifesto barrado e um allow-all disfarçado: `podSelector: {}` seleciona todos os pods do namespace e `- {}` libera tudo.
+- Sem rodada de verificacao, detalhes criticos passam batido, como DNS incompleto em egress.
+- O contrato final força YAML aplicavel, auto-critica e correcoes ponto a ponto.
+
+Modelo usado na execucao curada: GPT-4o mini para custo baixo. Segundo provedor opcional: Claude Haiku para comparar clareza do YAML e da verificacao.
 
 Saida resumida:
 
@@ -256,4 +337,9 @@ Verificacao apontou que faltava DNS TCP/53 e que os comentarios precisavam cobri
 
 V2 adicionou regra DNS TCP/53 e manteve default-deny separado. Nao ha `- {}` e o allow usa `app=sentinel`.
 
-Curadoria: usei generate-critique-refine. O refinamento de v1 para v2 corrigiu DNS TCP, um detalhe comum em hardening real.
+Curadoria:
+- Estrutura usada: generate -> security review -> refine.
+- Refinamento principal: corrigir DNS para TCP e UDP/53 e confirmar que `podSelector: {}` fica restrito ao default-deny.
+- Ganho real: impedir falso endurecimento que ainda quebra resolucao DNS ou ainda carrega seletor amplo demais.
+- Validacao metodologica: doc oficial de Kubernetes confirma que seletor vazio seleciona todos os pods do namespace e que default-deny de egress bloqueia DNS ate liberacao explicita.
+- Dados a tratar antes de modelo externo: namespaces internos, labels proprietarias, topologia de servicos, portas internas nao publicas e qualquer convencao sensivel do cluster.

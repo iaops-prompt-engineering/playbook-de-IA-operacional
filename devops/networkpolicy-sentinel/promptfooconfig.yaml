@@ -1,0 +1,72 @@
+description: networkpolicy-sentinel deterministic eval
+prompts:
+  - file://devops/networkpolicy-sentinel/prompt.md
+providers:
+  - openai:gpt-4o-mini
+  - anthropic:messages:claude-3-5-haiku-latest
+tests:
+  - vars:
+      manifesto_permissivo: |
+        apiVersion: networking.k8s.io/v1
+        kind: NetworkPolicy
+        metadata:
+          name: sentinel-allow
+          namespace: sentinel-prod
+        spec:
+          podSelector: {}
+          policyTypes:
+            - Ingress
+            - Egress
+          ingress:
+            - {}
+          egress:
+            - {}
+      padrao_seguranca: |
+        NetworkPolicy para o namespace "sentinel-prod":
+        - pods do Sentinel so aceitam trafego de entrada do Relay e do gateway de API da plataforma
+        - pods do Sentinel so fazem saida para Forge porta 5432, Cerebro porta 9200 e DNS interno
+        - nada de allow all em ingress ou egress
+        - politica default-deny explicita no namespace
+        - toda regra precisa de comentario dizendo qual fluxo legitimo ela libera
+      mapa_servicos: |
+        Sentinel     -> namespace sentinel-prod, pods com label app=sentinel
+        Relay        -> namespace relay-prod,    pods com label app=relay
+        API gateway  -> namespace edge,          pods com label app=api-gateway
+        Forge        -> namespace forge-prod,    pods com label app=forge,   porta 5432
+        Cerebro      -> namespace cerebro-prod,  pods com label app=cerebro, porta 9200
+        DNS interno  -> namespace kube-system,   pods com label k8s-app=kube-dns, porta 53
+    assert:
+      - type: contains
+        value: "kind: NetworkPolicy"
+      - type: contains
+        value: "V1:"
+      - type: contains
+        value: "VERIFICACAO:"
+      - type: contains
+        value: "V2 FINAL:"
+      - type: contains
+        value: "policyTypes:"
+      - type: contains
+        value: "Ingress"
+      - type: contains
+        value: "Egress"
+      - type: not-contains
+        value: "- {}"
+      - type: regex
+        value: "app:\\s*relay"
+      - type: regex
+        value: "port:\\s*5432"
+      - type: regex
+        value: "port:\\s*9200"
+      - type: regex
+        value: "protocol:\\s*UDP[\\s\\S]*port:\\s*53"
+      - type: regex
+        value: "protocol:\\s*TCP[\\s\\S]*port:\\s*53"
+      - type: regex
+        value: "kubernetes.io/metadata.name:\\s*kube-system"
+      - type: javascript
+        value: "output.includes('#') && (output.match(/#/g) || []).length >= 6"
+      - type: latency
+        threshold: 5000
+      - type: cost
+        threshold: 0.01

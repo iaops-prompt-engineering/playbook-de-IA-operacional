@@ -3,28 +3,18 @@ name: Promptfoo Evaluation
 on:
   pull_request:
     paths:
-      - "triagem-de-pods/**"
-      - "nota-de-triagem/**"
-      - "networkpolicy-sentinel/**"
-      - "causa-raiz/**"
-      - "backpressure-relay/**"
-      - "migracao-forge-event-driven/**"
-      - "docs/**"
+      - "devops/**"
       - ".github/workflows/promptfoo.yml"
       - "package.json"
+      - "package-lock.json"
   push:
     branches:
       - main
     paths:
-      - "triagem-de-pods/**"
-      - "nota-de-triagem/**"
-      - "networkpolicy-sentinel/**"
-      - "causa-raiz/**"
-      - "backpressure-relay/**"
-      - "migracao-forge-event-driven/**"
-      - "docs/**"
+      - "devops/**"
       - ".github/workflows/promptfoo.yml"
       - "package.json"
+      - "package-lock.json"
 
 jobs:
   evaluate:
@@ -37,27 +27,39 @@ jobs:
       fail-fast: false
       matrix:
         prompt:
-          - triagem-de-pods/promptfooconfig.yaml
-          - nota-de-triagem/promptfooconfig.yaml
-          - networkpolicy-sentinel/promptfooconfig.yaml
-          - causa-raiz/promptfooconfig.yaml
-          - backpressure-relay/promptfooconfig.yaml
-          - migracao-forge-event-driven/promptfooconfig.yaml
+          - devops/triagem-de-pods/promptfooconfig.yaml
+          - devops/nota-de-triagem/promptfooconfig.yaml
+          - devops/networkpolicy-sentinel/promptfooconfig.yaml
+          - devops/causa-raiz/promptfooconfig.yaml
+          - devops/backpressure-relay/promptfooconfig.yaml
+          - devops/migracao-forge-event-driven/promptfooconfig.yaml
+          - devops/migracao-forge-event-driven/elo-2-estrategia/promptfooconfig.yaml
+          - devops/migracao-forge-event-driven/elo-3-plano-reversivel/promptfooconfig.yaml
+
+    env:
+      PROMPTFOO_CONFIG_DIR: ${{ github.workspace }}/.promptfoo-home
+      PROMPTFOO_CACHE_PATH: ~/.cache/promptfoo
+      PROMPTFOO_DISABLE_TELEMETRY: "true"
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
 
       - name: Cache promptfoo evaluations
         uses: actions/cache@v4
         with:
           path: |
-            ~/.promptfoo/cache
-            .promptfoo-cache
-          key: ${{ runner.os }}-promptfoo-${{ hashFiles('**/prompt.md', '**/promptfooconfig.yaml') }}-${{ github.sha }}
+            ~/.cache/promptfoo
+            .promptfoo-home
+          key: ${{ runner.os }}-promptfoo-${{ hashFiles('devops/**/prompt.md', 'devops/**/promptfooconfig.yaml', 'package-lock.json') }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-promptfoo-${{ hashFiles('**/prompt.md', '**/promptfooconfig.yaml') }}-
+            ${{ runner.os }}-promptfoo-${{ hashFiles('devops/**/prompt.md', 'devops/**/promptfooconfig.yaml', 'package-lock.json') }}-
             ${{ runner.os }}-promptfoo-
 
       - name: Run promptfoo evaluation
@@ -67,7 +69,7 @@ jobs:
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
           config: ${{ matrix.prompt }}
-          cache-path: .promptfoo-cache
+          cache-path: ~/.cache/promptfoo
           fail-on-threshold: 100
           max-concurrency: 2
           no-share: true
