@@ -1,6 +1,6 @@
 description: backpressure-relay llm-as-judge gate
 prompts:
-  - file://devops/backpressure-relay/prompt.md
+  - file://prompt.md
 providers:
   - openai:gpt-4o-mini
 tests:

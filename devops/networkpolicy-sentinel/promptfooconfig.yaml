@@ -1,6 +1,6 @@
 description: networkpolicy-sentinel deterministic eval
 prompts:
-  - file://devops/networkpolicy-sentinel/prompt.md
+  - file://prompt.md
 providers:
   - openai:gpt-4o-mini
   - anthropic:messages:claude-3-5-haiku-latest
