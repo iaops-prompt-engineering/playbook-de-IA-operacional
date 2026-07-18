@@ -6,9 +6,10 @@
     "node": ">=20.20.0"
   },
   "scripts": {
-    "eval": "for f in */promptfooconfig.yaml; do npx promptfoo@latest eval -c \"$f\" || exit 1; done"
+    "eval": "mkdir -p .promptfoo-home && find devops -name promptfooconfig.yaml -print | sort | while read -r f; do PROMPTFOO_CONFIG_DIR=$PWD/.promptfoo-home PROMPTFOO_DISABLE_WAL_MODE=true PROMPTFOO_DISABLE_TELEMETRY=true ./node_modules/.bin/promptfoo eval -c \"$f\" || exit 1; done"
   },
   "devDependencies": {
-    "promptfoo": "latest"
+    "npm": "^10.9.8",
+    "promptfoo": "^0.119.14"
   }
 }

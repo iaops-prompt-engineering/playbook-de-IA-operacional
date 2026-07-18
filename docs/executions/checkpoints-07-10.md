@@ -4,21 +4,21 @@
 
 Mapeamento aplicado:
 
-- Categoria unica na raiz do repositorio, porque todos os prompts pertencem ao playbook operacional.
+- Categoria `devops/` na raiz do repositorio, porque todos os prompts pertencem ao playbook operacional.
 - Uma pasta por resultado, em kebab-case, sem aninhamento.
 - Cada prompt tem `prompt.md` com frontmatter e placeholders `{{variavel}}`.
 - Cada prompt tem `README.md` com o mesmo frontmatter, objetivo, casos de uso, exemplo e limitacoes.
 - Todos nascem em `versao: 1.0.0`.
 
-Exemplo completo: `triagem-de-pods/prompt.md` e `triagem-de-pods/README.md`.
+Exemplo completo: `devops/triagem-de-pods/prompt.md` e `devops/triagem-de-pods/README.md`.
 
 ## CP08 - testes deterministicos
 
 Configs criados:
 
-- `nota-de-triagem/promptfooconfig.yaml`
-- `triagem-de-pods/promptfooconfig.yaml`
-- `networkpolicy-sentinel/promptfooconfig.yaml`
+- `devops/nota-de-triagem/promptfooconfig.yaml`
+- `devops/triagem-de-pods/promptfooconfig.yaml`
+- `devops/networkpolicy-sentinel/promptfooconfig.yaml`
 
 Cobertura:
 
@@ -29,22 +29,54 @@ Cobertura:
 Resultado de execucao local:
 
 ```text
-npx promptfoo@latest eval -c nota-de-triagem/promptfooconfig.yaml
-Falha antes da avaliacao: promptfoo requer Node ^20.20.0 || >=22.22.0; ambiente local tem v20.19.2.
+npx promptfoo@latest eval -c devops/nota-de-triagem/promptfooconfig.yaml
+npm ERR! Invalid Version:
 
-npx promptfoo@0.120.0 eval -c nota-de-triagem/promptfooconfig.yaml
-Falha antes da avaliacao: instalacao compilou better-sqlite3 por falta de binario precompilado e foi interrompida apos travar.
+npx promptfoo@latest eval -c devops/triagem-de-pods/promptfooconfig.yaml
+npm ERR! Invalid Version:
+
+npx promptfoo@latest eval -c devops/networkpolicy-sentinel/promptfooconfig.yaml
+npm ERR! Invalid Version:
+
+npx promptfoo@0.120.0 eval -c devops/nota-de-triagem/promptfooconfig.yaml
+Database migration failed: Error: Can't find meta/_journal.json file
+
+npx promptfoo@0.120.0 eval -c devops/triagem-de-pods/promptfooconfig.yaml
+Database migration failed: Error: Can't find meta/_journal.json file
+
+npx promptfoo@0.120.0 eval -c devops/networkpolicy-sentinel/promptfooconfig.yaml
+Database migration failed: Error: Can't find meta/_journal.json file
+
+./node_modules/.bin/promptfoo eval -c devops/nota-de-triagem/promptfooconfig.yaml
+Evaluation complete
+Successes: 0
+Failures: 0
+Errors: 6
+Erro real: OPENAI_API_KEY e ANTHROPIC_API_KEY ausentes
+
+./node_modules/.bin/promptfoo eval -c devops/triagem-de-pods/promptfooconfig.yaml
+Evaluation complete
+Successes: 0
+Failures: 0
+Errors: 6
+Erro real: OPENAI_API_KEY e ANTHROPIC_API_KEY ausentes
+
+./node_modules/.bin/promptfoo eval -c devops/networkpolicy-sentinel/promptfooconfig.yaml
+Evaluation complete
+Successes: 0
+Failures: 0
+Errors: 2
+Erro real: OPENAI_API_KEY e ANTHROPIC_API_KEY ausentes
 ```
 
-Resultado esperado em ambiente compativel com Node >= 20.20 e chaves configuradas:
+Curadoria:
 
-```text
-nota-de-triagem: PASS em 6/6 chamadas (3 testes x 2 providers)
-triagem-de-pods: PASS em 6/6 chamadas (3 testes x 2 providers)
-networkpolicy-sentinel: PASS em 2/2 chamadas (1 teste x 2 providers)
-```
-
-Curadoria: os asserts sao intencionalmente sobre propriedades verificaveis. Nao avaliam qualidade profunda, que fica para juiz no CP09 e CP10.
+- O que passou: a modelagem dos 3 configs bate com o checkpoint. Todos usam `prompt.md` em `devops/`, cobrem os casos corretos e incluem `latency` <= 5s e `cost` <= 0.01.
+- O que foi corrigido: runtime local do `promptfoo`.
+- Falha 1 com `promptfoo@latest`: `npm ERR! Invalid Version:`
+- Falha 2 com `promptfoo@0.120.0`: `Database migration failed: Error: Can't find meta/_journal.json file`
+- Ajuste aplicado: pin local de `promptfoo` em `0.119.14`, `PROMPTFOO_CONFIG_DIR=$PWD/.promptfoo-home`, `PROMPTFOO_DISABLE_WAL_MODE=true` e `PROMPTFOO_DISABLE_TELEMETRY=true`.
+- Estado atual: `promptfoo eval` roda de verdade. O bloqueio restante nao e mais de runtime; e de credencial. Sem `OPENAI_API_KEY` e `ANTHROPIC_API_KEY`, a suite fecha com `Errors`, nao com `Pass/Fail`.
 
 ## CP09 - gate com LLM-as-judge
 
@@ -59,7 +91,7 @@ Rubrica:
 
 Corte: total >= 6 e nenhum criterio zerado.
 
-Config criado: `causa-raiz/promptfooconfig.yaml`.
+Config criado: `devops/causa-raiz/promptfooconfig.yaml`.
 
 Calibracao humana:
 
@@ -67,7 +99,31 @@ Calibracao humana:
 - Saida que culpa apenas cache: humano 3/8, juiz deve reprovar por causa-raiz e correlacao.
 - Saida que acerta causa mas inventa metrica externa: humano 5/8, juiz deve reprovar por honestidade epistemica.
 
-Ajuste feito: o texto do juiz inclui a regra "reprove se qualquer criterio for 0", porque apenas threshold numerico poderia aprovar uma resposta com lacuna grave.
+Ajustes feitos:
+
+- A rubrica do juiz foi reescrita para espelhar exatamente os 4 criterios do checkpoint, cada um com escala 0, 1 ou 2.
+- O texto agora explicita a cadeia causal correta esperada: reindexacao travada, saturacao de heap/escrita, circuit breaker, timeout de busca e queda do cache.
+- O gate ficou com duas travas:
+  - `threshold: 0.75`, equivalente a 6/8
+  - regra textual: reprovar automaticamente se qualquer criterio receber 0
+
+Saida real da execucao:
+
+```text
+./node_modules/.bin/promptfoo eval -c devops/causa-raiz/promptfooconfig.yaml
+Evaluation complete
+Successes: 0
+Failures: 0
+Errors: 1
+Erro real: OPENAI_API_KEY ausente
+```
+
+Curadoria:
+
+- O que passou: configuracao do gate ficou pronta e mais estrita que a versao anterior. O runtime local do `promptfoo` ja consegue abrir config e iniciar a avaliacao.
+- O que falhou: a execucao real do juiz nao conseguiu chamar o provider porque `OPENAI_API_KEY` nao esta presente no ambiente.
+- O que foi ajustado: endurecimento da rubrica, mantendo corte >= 6 e regra de nenhum zero.
+- Leitura pratica: o gate de qualidade do CP09 esta implementado. Para virar `PASS/FAIL` sem `Errors`, falta apenas credencial de provider.
 
 ## CP10 - pipeline e estrategia de gate
 
@@ -76,11 +132,21 @@ Workflow: `.github/workflows/promptfoo.yml`.
 Estrategia escolhida:
 
 - Rodar em `pull_request` e `push` para `main`.
-- Usar matriz por `promptfooconfig.yaml`, isolando falhas por prompt.
+- Usar matriz explicita por `promptfooconfig.yaml`, isolando falhas por prompt.
 - Falhar build com `fail-on-threshold: 100`.
 - Deterministicos falham por assert objetivo.
 - Prompts abertos falham por LLM-as-judge quando a rubrica reprova.
-- Cache do promptfoo habilitado para reduzir custo e latencia.
+- Cobertura levada a toda a biblioteca:
+  - `devops/triagem-de-pods/promptfooconfig.yaml`
+  - `devops/nota-de-triagem/promptfooconfig.yaml`
+  - `devops/networkpolicy-sentinel/promptfooconfig.yaml`
+  - `devops/causa-raiz/promptfooconfig.yaml`
+  - `devops/backpressure-relay/promptfooconfig.yaml`
+  - `devops/migracao-forge-event-driven/promptfooconfig.yaml`
+  - `devops/migracao-forge-event-driven/elo-2-estrategia/promptfooconfig.yaml`
+  - `devops/migracao-forge-event-driven/elo-3-plano-reversivel/promptfooconfig.yaml`
+- Cache do promptfoo e cache de npm habilitados para reduzir custo e latencia.
+- Node 22 no CI para compatibilidade com a Action e com o runtime atual do promptfoo.
 - Chaves em GitHub Secrets: `OPENAI_API_KEY` e `ANTHROPIC_API_KEY`.
 
 Comparacao de alternativas:
@@ -93,7 +159,7 @@ Comparacao de alternativas:
 2. Rodar suite inteira vs so prompts alterados
 
 - Suite inteira: maior custo, mas detecta que mudanca compartilhada em docs, workflow ou provider quebrou prompt nao alterado.
-- So alterados: mais barato e rapido, mas pode perder regressao indireta. Escolha: matriz completa em PR/push porque a biblioteca ainda e pequena.
+- So alterados: mais barato e rapido, mas pode perder regressao indireta. Escolha: matriz completa em PR/push porque a biblioteca ainda e pequena e ha prompts encadeados com risco de impacto indireto.
 
 3. Um job unico vs matriz por config
 
@@ -105,10 +171,29 @@ Comparacao de alternativas:
 - 100: rigoroso e bom para prompts pequenos com asserts objetivos, mas pode bloquear por flutuacao de juiz.
 - Parcial: tolera ruido, mas permite regressao passar. Escolha: 100 com rubricas especificas e modelos baratos/estaveis; se o juiz flutuar em producao, pin de modelo e repeticao com mediana seriam o proximo ajuste.
 
+5. Action oficial do promptfoo vs shell script proprio
+
+- Action oficial: ja comenta o resultado direto no PR, segue a doc do produto e reduz trabalho manual de integracao. Desvantagem: menos controle fino do fluxo interno.
+- Shell script proprio: mais controle sobre logs, retries e formatacao, mas exige implementar comentario em PR, tratamento de saida e manutencao extra. Escolha: action oficial como base, com `setup-node`, cache e matriz ao redor.
+
+6. Secrets por repositorio vs secrets de ambiente/organizacao
+
+- Secrets por repositorio: simples, rapidos de configurar e suficientes para um repositorio unico. Desvantagem: proliferam se a governanca crescer.
+- Secrets de ambiente ou organizacao: melhor centralizacao e rotacao, mas exige governanca maior e pode complicar contribuicao em repos menores. Escolha atual: repository secrets, com evolucao natural para organization secrets se o playbook se espalhar.
+
+Evidencia de execucao:
+
+```text
+Execucao local do workflow equivalent:
+- promptfoo inicia e carrega os configs
+- sem OPENAI_API_KEY e ANTHROPIC_API_KEY, os jobs fecham com Errors
+- runtime local foi corrigido com promptfoo 0.119.14, config dir local e WAL desativado
+```
+
 Evidencia de falha provocada esperada:
 
 ```text
-Se `networkpolicy-sentinel/prompt.md` permitir `- {}`, o assert `not-contains: - {}` falha e o job `networkpolicy-sentinel` reprova.
+Se `devops/networkpolicy-sentinel/prompt.md` permitir `- {}`, o assert `not-contains: - {}` falha e o job `networkpolicy-sentinel` reprova.
 ```
 
 Evidencia de sucesso esperada:
@@ -116,3 +201,16 @@ Evidencia de sucesso esperada:
 ```text
 Todos os configs retornam PASS quando os prompts mantem os contratos de formato, custo, latencia e qualidade.
 ```
+
+Curadoria:
+
+- O que foi ajustado no workflow:
+  - remocao de `docs/**` dos gatilhos para evitar custo em mudanca apenas documental
+  - inclusao de todos os `promptfooconfig.yaml`, inclusive os elos 2 e 3 da cadeia do Forge
+  - `actions/setup-node@v4` com Node 22
+  - cache de npm e cache de promptfoo
+  - `PROMPTFOO_CONFIG_DIR`, `PROMPTFOO_CACHE_PATH` e `PROMPTFOO_DISABLE_TELEMETRY`
+- O que ainda falta para evidencia completa de sucesso/falha no CI:
+  - `OPENAI_API_KEY`
+  - `ANTHROPIC_API_KEY`
+  - um push/PR com workflow ativo no GitHub
