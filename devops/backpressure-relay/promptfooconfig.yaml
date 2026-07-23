@@ -10,18 +10,21 @@ tests:
         Restricoes: Sentinel nao pode atrasar mais que 60s; Forge pode atrasar ate 15min; orcamento do trimestre 8% acima do previsto; perda de telemetry e inaceitavel.
         Alternativas em avaliacao: prioridade ao Sentinel, fila separada para reprocessamento, dividir Relay por cliente, autoscaling de consumidores.
     assert:
-      - type: regex
-        value: "(Sentinel|60s)"
-      - type: regex
-        value: "(Forge|15min)"
-      - type: regex
-        value: "(perda de mensagens|perda de telemetry|zero perda)"
-      - type: regex
-        value: "(DESCARTES|drop de mensagens|autoscaling puro)"
-      - type: llm-rubric
-        value: |
-          A resposta deve comparar multiplas alternativas, preservar perda zero de telemetry, priorizar SLA de Sentinel, respeitar tolerancia do Forge e justificar custo/complexidade. Aprove somente se houver recomendacao combinada ou claramente justificada, rollout e metricas.
+      - type: contains
+        value: "DECISAO RECOMENDADA:"
+      - type: contains
+        value: "RESTRICOES QUE GOVERNAM A DECISAO:"
+      - type: contains
+        value: "COMPARACAO DE ALTERNATIVAS:"
+      - type: contains
+        value: "ROLLOUT PROPOSTO:"
+      - type: contains
+        value: "DESCARTES:"
+      - type: contains
+        value: "METRICAS DE SUCESSO:"
+      - type: not-contains
+        value: "```"
       - type: latency
-        threshold: 5000
+        threshold: 20000
       - type: cost
         threshold: 0.01

@@ -38,10 +38,9 @@ Regras:
 - Se a melhor resposta for combinacao de alternativas, diga isso explicitamente.
 - Se uma alternativa depender de precondicao nao presente, registre essa dependencia.
 - Nao entregue uma resposta unica sem comparacao.
+- Nao use cercas de codigo, markdown extra ou texto fora do formato final.
 
 Formato de saida:
-
-```text
 DECISAO RECOMENDADA:
 <estrategia>
 
@@ -60,4 +59,3 @@ DESCARTES:
 
 METRICAS DE SUCESSO:
 - <metrica>
-```
