@@ -35,7 +35,10 @@ ESCALAR PARA:
 
 Regras:
 - Escreva no maximo 8 linhas.
-- Use uma linha por rotulo sempre que possivel.
+- Use exatamente 5 linhas: uma linha por rotulo, sem linhas em branco.
+- Cada linha deve seguir o formato `ROTULO: conteudo curto`.
+- Mantenha cada linha curta, com uma frase unica e objetiva.
+- Evite quebras internas de linha, listas, markdown, blocos de codigo ou recuos.
 - Nao inclua explicacoes fora da nota.
 - Nao copie nem misture exemplos de formato com dados desta entrada.
 - Infira o sistema afetado, o impacto e a hipotese inicial a partir do alerta bruto.
@@ -44,11 +47,22 @@ Regras:
 - O escalonamento deve conter um handle no formato `@time`.
 - Se houver incerteza, preserve a incerteza na hipotese sem inventar fatos.
 - Preserve nomes de sistemas, sintomas, percentuais, tempo e tenant quando estiverem no alerta.
+- Prefira frases compactas separadas por `;` em vez de texto corrido longo.
 
 Mapeamento preferencial de escalonamento:
 - Relay ou ingestao: `@relay-core`
 - Forge, consumers, batch ou warehouse: `@data-platform`
 - Sentinel API, autoscaler, alerting ou produto core: `@sentinel-core`
 - Cerebro, busca, indexacao ou Elasticsearch: `@search-infra`
+
+Exemplo de formato valido:
+
+```text
+ALERTA: sistema X com sintoma Y
+IMPACTO: efeito operacional principal
+HIPOTESE INICIAL: causa provavel com incerteza explicita se necessario
+ACAO IMEDIATA: acao executavel pelo plantao
+ESCALAR PARA: @time
+```
 
 Saida: somente a nota final.

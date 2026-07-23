@@ -44,6 +44,12 @@ Regras:
 - Seja explicito quando a evidencia nao permitir concluir algo.
 - Se um artefato contradizer outro, registre a contradicao.
 - Use linguagem de incidente: direta, verificavel e acionavel.
+- Na secao `CAUSA-RAIZ`, cite explicitamente a reindexacao travada ou prolongada como gatilho primario quando os artefatos mostrarem isso.
+- Na secao `CADEIA DE EVIDENCIAS`, conecte reindexacao, saturacao de heap ou fila de escrita, circuit breaker ou rejeicoes, e entao timeouts, resultados parciais ou queda de cache.
+- Na secao `SINTOMAS E CONSEQUENCIAS`, trate cache hit baixo, timeouts, shards parciais e circuit breaker como efeitos observados, nao como causa primaria.
+- Em `ACOES RECOMENDADAS`, inclua uma acao de contencao imediata e uma acao estrutural coerentes com a causa encontrada.
+- Em `HIPOTESES MENOS PROVAVEIS`, descarte explicitamente pelo menos uma explicacao alternativa apoiando-se nos artefatos.
+- Em `LACUNAS E INCERTEZAS`, aponte o que falta medir ou confirmar sem inventar certeza.
 
 Formato de saida:
 
