@@ -2,8 +2,8 @@ description: causa-raiz llm-as-judge gate anthropic
 prompts:
   - file://prompt.md
 providers:
-  - id: anthropic:claude-sonnet-4
-    label: anthropic-claude-sonnet-4
+  - id: anthropic:claude-3-5-haiku-latest
+    label: anthropic-claude-3-5-haiku
 tests:
   - vars:
       sistema: Cerebro
