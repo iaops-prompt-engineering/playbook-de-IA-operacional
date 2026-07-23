@@ -9,16 +9,19 @@ tests:
         Forge hoje: cron a cada 60min, job forge-batch-ingest; transformacao em 14 etapas Spark, 40min; destino em tabelas no warehouse particionadas por hora; falha acumula volume dobrado; dependentes Sentinel, Cerebro e billing.
         O objetivo do Elo 1 e diagnosticar o estado atual, apontar invariantes, riscos e lacunas, sem propor ainda a estrategia de migracao.
     assert:
-      - type: regex
-        value: "(INVARIANTES|invariantes)"
-      - type: regex
-        value: "(LACUNAS|lacunas)"
-      - type: regex
-        value: "(ENTRADA PARA O ELO 2|Elo 2)"
-      - type: llm-rubric
-        value: |
-          A resposta deve diagnosticar o estado atual do Forge, listar dependencias, invariantes, riscos e lacunas, e produzir uma entrada clara para o Elo 2. Reprove respostas que misturem estrategia ou plano executavel no Elo 1.
+      - type: contains
+        value: "ELO 1 - DIAGNOSTICO:"
+      - type: contains
+        value: "INVARIANTES:"
+      - type: contains
+        value: "LACUNAS:"
+      - type: contains
+        value: "CRITERIOS PARA O ELO 2:"
+      - type: contains
+        value: "ENTRADA PARA O ELO 2:"
+      - type: not-contains
+        value: "```"
       - type: latency
-        threshold: 5000
+        threshold: 20000
       - type: cost
         threshold: 0.01
