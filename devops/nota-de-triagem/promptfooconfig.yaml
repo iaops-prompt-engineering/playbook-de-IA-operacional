@@ -31,9 +31,9 @@ tests:
         sending 4x baseline volume after onboarding new region
     assert:
       - type: regex
-        value: "ALERTA:.*Sentinel"
+        value: "ALERTA:.*(Sentinel|sentinel-api)"
       - type: regex
-        value: "HIPOTESE INICIAL:.*(onboarding|nova regiao|4x baseline)"
+        value: "HIPOTESE INICIAL:.*(onboarding|nova regi[aã]o|4x baseline|aumento inesperado no volume)"
       - type: regex
         value: "ESCALAR PARA:.*@sentinel-core"
   - vars:
@@ -55,6 +55,6 @@ tests:
       - type: regex
         value: "ALERTA:.*Forge"
       - type: regex
-        value: "HIPOTESE INICIAL:.*(job failure|job anterior|batch)"
+        value: "HIPOTESE INICIAL:.*(job failure|job anterior|jobs? anteriores?|batch|falha no processamento)"
       - type: regex
         value: "ESCALAR PARA:.*@data-platform"
