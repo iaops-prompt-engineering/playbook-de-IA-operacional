@@ -50,10 +50,9 @@ Regras:
 - Em `ACOES RECOMENDADAS`, inclua uma acao de contencao imediata e uma acao estrutural coerentes com a causa encontrada.
 - Em `HIPOTESES MENOS PROVAVEIS`, descarte explicitamente pelo menos uma explicacao alternativa apoiando-se nos artefatos.
 - Em `LACUNAS E INCERTEZAS`, aponte o que falta medir ou confirmar sem inventar certeza.
+- Nao use cercas de codigo, markdown extra ou texto fora do formato final.
 
 Formato de saida:
-
-```text
 CAUSA-RAIZ:
 <uma ou duas frases>
 
@@ -76,4 +75,3 @@ LACUNAS E INCERTEZAS:
 
 SANITIZACAO ANTES DE MODELO EXTERNO:
 - <dados a mascarar ou remover>
-```

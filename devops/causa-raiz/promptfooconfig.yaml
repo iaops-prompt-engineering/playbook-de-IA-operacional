@@ -12,13 +12,15 @@ tests:
         Logs: reindex 02:00 ainda em 38% as 08:02 e 41% as 09:58; throttling de indexacao; write queue 150/200, depois 188/200, depois full 200/200 com EsRejectedExecutionException; GC old com heap 7.6GB para 7.4GB de 8GB; query timeout 5031ms; resultados parciais 11/12 shards; circuit breaker a 96%; cache eviction e hit ratio 0.29; CircuitBreakingException Data too large.
     assert:
       - type: regex
-        value: "(reindex[açc][aã]o|reindex)"
+        value: "(reindexa[cç][aã]o|reindexacao|reindexação|reindex)"
       - type: regex
         value: "(circuit breaker|CircuitBreakingException|breaker)"
       - type: regex
         value: "(cache hit|cache_hit_pct|cache)"
       - type: regex
         value: "(SANITIZACAO ANTES DE MODELO EXTERNO|SANITIZAÇÃO ANTES DE MODELO EXTERNO)"
+      - type: not-contains
+        value: "```"
       - type: llm-rubric
         threshold: 0.75
         value: |
