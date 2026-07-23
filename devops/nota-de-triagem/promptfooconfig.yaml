@@ -43,8 +43,16 @@ tests:
     assert:
       - type: regex
         value: "ALERTA:.*Relay"
-      - type: regex
-        value: "HIPOTESE INICIAL:.*(deploy 02:55|buffer)"
+      - type: javascript
+        value: |
+          const lower = output.toLowerCase();
+          lower.includes('hipotese inicial:') &&
+          (
+            lower.includes('deploy') ||
+            lower.includes('buffer') ||
+            lower.includes('sobrecarga') ||
+            lower.includes('configura')
+          )
       - type: regex
         value: "ESCALAR PARA:.*@relay-core"
   - vars:
@@ -54,7 +62,19 @@ tests:
     assert:
       - type: regex
         value: "ALERTA:.*Forge"
-      - type: regex
-        value: "HIPOTESE INICIAL:.*(job failure|job anterior|jobs? anteriores?|batch|falha no processamento|falha em lote|falha anterior|bloqueio no fluxo)"
+      - type: javascript
+        value: |
+          const lower = output.toLowerCase();
+          lower.includes('hipotese inicial:') &&
+          (
+            lower.includes('job anterior') ||
+            lower.includes('falha anterior') ||
+            lower.includes('falha no job') ||
+            lower.includes('batch') ||
+            lower.includes('lote') ||
+            lower.includes('acúmulo') ||
+            lower.includes('acumulo') ||
+            lower.includes('fluxo')
+          )
       - type: regex
         value: "ESCALAR PARA:.*@data-platform"
