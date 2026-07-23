@@ -29,8 +29,10 @@ jobs:
         prompt:
           - devops/triagem-de-pods/promptfooconfig.yaml
           - devops/nota-de-triagem/promptfooconfig.yaml
+          - devops/nota-de-triagem/promptfooconfig.anthropic.yaml
           - devops/networkpolicy-sentinel/promptfooconfig.yaml
           - devops/causa-raiz/promptfooconfig.yaml
+          - devops/causa-raiz/promptfooconfig.anthropic.yaml
           - devops/backpressure-relay/promptfooconfig.yaml
           - devops/migracao-forge-event-driven/promptfooconfig.yaml
           - devops/migracao-forge-event-driven/elo-2-estrategia/promptfooconfig.yaml
@@ -38,8 +40,11 @@ jobs:
 
     env:
       PROMPTFOO_CONFIG_DIR: ${{ github.workspace }}/.promptfoo-home
-      PROMPTFOO_CACHE_PATH: ~/.cache/promptfoo
+      PROMPTFOO_CACHE_PATH: ${{ github.workspace }}/.promptfoo-cache
+      PROMPTFOO_DISABLE_WAL_MODE: "true"
       PROMPTFOO_DISABLE_TELEMETRY: "true"
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
     steps:
       - uses: actions/checkout@v5
@@ -55,11 +60,11 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            ~/.cache/promptfoo
+            .promptfoo-cache
             .promptfoo-home
-          key: ${{ runner.os }}-promptfoo-${{ hashFiles('devops/**/prompt.md', 'devops/**/promptfooconfig.yaml', 'package-lock.json') }}-${{ github.sha }}
+          key: ${{ runner.os }}-promptfoo-${{ hashFiles('devops/**/prompt.md', 'devops/**/promptfooconfig*.yaml', 'package-lock.json') }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-promptfoo-${{ hashFiles('devops/**/prompt.md', 'devops/**/promptfooconfig.yaml', 'package-lock.json') }}-
+            ${{ runner.os }}-promptfoo-${{ hashFiles('devops/**/prompt.md', 'devops/**/promptfooconfig*.yaml', 'package-lock.json') }}-
             ${{ runner.os }}-promptfoo-
 
       - name: Run promptfoo evaluation
@@ -67,8 +72,10 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
           config: ${{ matrix.prompt }}
-          cache-path: ~/.cache/promptfoo
+          cache-path: ${{ github.workspace }}/.promptfoo-cache
           fail-on-threshold: 100
           max-concurrency: 2
           no-share: true
+          promptfoo-version: 0.119.14

@@ -35,7 +35,7 @@ Execute todos os configs:
 npm run eval
 ```
 
-Os configs usam limites operacionais de latencia e custo e combinam asserts determinísticos com LLM-as-judge nos prompts de saida aberta.
+Os configs usam limites operacionais de latencia e custo e combinam asserts determinísticos com LLM-as-judge nos prompts de saida aberta. A suite agora inclui configs separados para OpenAI e Anthropic onde a comparacao entre provedores faz sentido sem duplicar toda a matriz.
 
 Para execucao local, exporte:
 

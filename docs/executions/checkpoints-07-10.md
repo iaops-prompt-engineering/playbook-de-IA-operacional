@@ -26,7 +26,7 @@ Cobertura:
 - `triagem-de-pods`: OOM/memoria na entrada 1, ImagePullBackOff e CPU insuficiente na entrada 2, caso saudavel na entrada 3, latencia e custo.
 - `networkpolicy-sentinel`: `kind`, `policyTypes`, ausencia de `- {}`, fluxos Forge/Cerebro/Relay, comentarios, latencia e custo.
 
-Resultado de execucao local:
+Resultado de execucao local originalmente registrado:
 
 ```text
 npx promptfoo@latest eval -c devops/nota-de-triagem/promptfooconfig.yaml
@@ -107,7 +107,7 @@ Ajustes feitos:
   - `threshold: 0.75`, equivalente a 6/8
   - regra textual: reprovar automaticamente se qualquer criterio receber 0
 
-Saida real da execucao:
+Saida local originalmente registrada:
 
 ```text
 ./node_modules/.bin/promptfoo eval -c devops/causa-raiz/promptfooconfig.yaml
@@ -121,9 +121,9 @@ Erro real: OPENAI_API_KEY ausente
 Curadoria:
 
 - O que passou: configuracao do gate ficou pronta e mais estrita que a versao anterior. O runtime local do `promptfoo` ja consegue abrir config e iniciar a avaliacao.
-- O que falhou: a execucao real do juiz nao conseguiu chamar o provider porque `OPENAI_API_KEY` nao esta presente no ambiente.
+- O que falhou localmente: a execucao real do juiz nao conseguiu chamar o provider porque `OPENAI_API_KEY` nao esta presente no ambiente.
 - O que foi ajustado: endurecimento da rubrica, mantendo corte >= 6 e regra de nenhum zero.
-- Leitura pratica: o gate de qualidade do CP09 esta implementado. Para virar `PASS/FAIL` sem `Errors`, falta apenas credencial de provider.
+- Leitura pratica: o gate de qualidade do CP09 esta implementado. Para virar `PASS/FAIL` sem `Errors`, faltava credencial valida de provider no ambiente local.
 
 ## CP10 - pipeline e estrategia de gate
 
@@ -147,7 +147,7 @@ Estrategia escolhida:
   - `devops/migracao-forge-event-driven/elo-3-plano-reversivel/promptfooconfig.yaml`
 - Cache do promptfoo e cache de npm habilitados para reduzir custo e latencia.
 - Node 22 no CI para compatibilidade com a Action e com o runtime atual do promptfoo.
-- Chaves em GitHub Secrets: `OPENAI_API_KEY` e `ANTHROPIC_API_KEY`.
+- Chaves esperadas em GitHub Secrets: `OPENAI_API_KEY` e `ANTHROPIC_API_KEY`.
 
 Comparacao de alternativas:
 
@@ -181,12 +181,12 @@ Comparacao de alternativas:
 - Secrets por repositorio: simples, rapidos de configurar e suficientes para um repositorio unico. Desvantagem: proliferam se a governanca crescer.
 - Secrets de ambiente ou organizacao: melhor centralizacao e rotacao, mas exige governanca maior e pode complicar contribuicao em repos menores. Escolha atual: repository secrets, com evolucao natural para organization secrets se o playbook se espalhar.
 
-Evidencia de execucao:
+Evidencia de execucao originalmente registrada:
 
 ```text
 Execucao local do workflow equivalent:
 - promptfoo inicia e carrega os configs
-- sem OPENAI_API_KEY e ANTHROPIC_API_KEY, os jobs fecham com Errors
+- sem OPENAI_API_KEY e ANTHROPIC_API_KEY, os jobs locais fechavam com Errors
 - runtime local foi corrigido com promptfoo 0.119.14, config dir local e WAL desativado
 ```
 
@@ -211,6 +211,22 @@ Curadoria:
   - cache de npm e cache de promptfoo
   - `PROMPTFOO_CONFIG_DIR`, `PROMPTFOO_CACHE_PATH` e `PROMPTFOO_DISABLE_TELEMETRY`
 - O que ainda falta para evidencia completa de sucesso/falha no CI:
-  - `OPENAI_API_KEY`
   - `ANTHROPIC_API_KEY`
-  - um push/PR com workflow ativo no GitHub
+  - substituir `OPENAI_API_KEY` por uma chave com quota valida
+  - um push/PR com workflow ativo no GitHub depois da correcao
+
+## Estado real observado no GitHub em 18 de julho de 2026
+
+Evidencia remota conferida depois da curadoria inicial:
+
+- O repositorio tinha `OPENAI_API_KEY` cadastrado em GitHub Secrets em `2026-07-18T19:23:13Z`.
+- O repositorio nao tinha `ANTHROPIC_API_KEY` cadastrado.
+- Os runs `29657949042` (pull request em `2026-07-18T19:31:08Z`) e `29658034570` (push em `2026-07-18T19:33:52Z`) nao falharam por ausencia de `OPENAI_API_KEY`; falharam porque o provider OpenAI respondeu `HTTP 429 Too Many Requests (code: insufficient_quota)`.
+- Nesses runs o `promptfoo-action` tambem executou `npx promptfoo@latest`, instalando `promptfoo@0.121.19`, em vez da versao pinada local `0.119.14`.
+- O `cache-path` foi resolvido pelo action como `.../playbook-de-IA-operacional/~/.cache/promptfoo`, evidenciando uso de caminho relativo inadequado no workflow.
+
+Leitura pratica atual:
+
+- O bloqueio do CI deixou de ser "secret ausente" para OpenAI e passou a ser "secret presente mas sem quota valida".
+- O segundo provedor continua ausente no repositório remoto.
+- Sem corrigir quota do OpenAI e sem cadastrar `ANTHROPIC_API_KEY`, os checkpoints 08, 09 e 10 continuam sem `PASS/FAIL` real e sem a nota do juiz em execucao concluida.
