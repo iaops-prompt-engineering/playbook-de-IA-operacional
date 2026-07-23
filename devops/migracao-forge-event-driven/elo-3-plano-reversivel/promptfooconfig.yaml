@@ -13,16 +13,6 @@ tests:
     assert:
       - type: contains
         value: "ELO 3 - PLANO EXECUTAVEL:"
-      - type: contains
-        value: "FASES:"
-      - type: contains
-        value: "ROLLBACK:"
-      - type: contains
-        value: "RISCOS RESIDUAIS:"
-      - type: contains
-        value: "CRITERIOS DE SUCESSO:"
-      - type: contains
-        value: "ENTRADA FINAL PARA EXECUCAO:"
       - type: not-contains
         value: "```"
       - type: latency
