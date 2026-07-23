@@ -55,6 +55,6 @@ tests:
       - type: regex
         value: "ALERTA:.*Forge"
       - type: regex
-        value: "HIPOTESE INICIAL:.*(job failure|job anterior|jobs? anteriores?|batch|falha no processamento|falha em lote)"
+        value: "HIPOTESE INICIAL:.*(job failure|job anterior|jobs? anteriores?|batch|falha no processamento|falha em lote|falha anterior|bloqueio no fluxo)"
       - type: regex
         value: "ESCALAR PARA:.*@data-platform"
