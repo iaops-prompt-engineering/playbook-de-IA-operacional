@@ -44,7 +44,7 @@ tests:
       - type: regex
         value: "ALERTA:.*Relay"
       - type: regex
-        value: "HIPOTESE INICIAL:.*(deploy 02:55|buffer)"
+        value: "HIPOTESE INICIAL:.*(deploy 02:55|deploy recente|buffer|erro de configura[cç][aã]o)"
       - type: regex
         value: "ESCALAR PARA:.*@relay-core"
   - vars:
@@ -55,6 +55,6 @@ tests:
       - type: regex
         value: "ALERTA:.*Forge"
       - type: regex
-        value: "HIPOTESE INICIAL:.*(job failure|job anterior|jobs? anteriores?|batch|falha no processamento)"
+        value: "HIPOTESE INICIAL:.*(job failure|job anterior|jobs? anteriores?|batch|falha no processamento|falha em lote)"
       - type: regex
         value: "ESCALAR PARA:.*@data-platform"
