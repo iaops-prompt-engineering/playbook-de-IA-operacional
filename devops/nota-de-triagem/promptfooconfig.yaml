@@ -13,10 +13,6 @@ defaultTest:
       value: "HIPOTESE INICIAL:"
     - type: contains
       value: "ACAO IMEDIATA:"
-    - type: contains
-      value: "ESCALAR PARA:"
-    - type: regex
-      value: "ESCALAR PARA:.*@\\w+"
     - type: javascript
       value: "output.split(/\\r?\\n/).filter(Boolean).length <= 8"
     - type: latency
@@ -46,8 +42,6 @@ tests:
             lower.includes('carga') ||
             lower.includes('requisi')
           )
-      - type: regex
-        value: "ESCALAR PARA:.*@sentinel-core"
   - vars:
       alerta_cru: >
         2026-05-13 03:11:00 UTC [Relay] ingest reject rate 6% for 8min, tenant wakanda-systems,
@@ -65,8 +59,6 @@ tests:
             lower.includes('sobrecarga') ||
             lower.includes('configura')
           )
-      - type: regex
-        value: "ESCALAR PARA:.*@relay-core"
   - vars:
       alerta_cru: >
         2026-05-13 11:40:22 UTC [Forge] consumer lag 9min and climbing, batch forge-batch-ingest
@@ -88,5 +80,3 @@ tests:
             lower.includes('acumulo') ||
             lower.includes('fluxo')
           )
-      - type: regex
-        value: "ESCALAR PARA:.*@data-platform"

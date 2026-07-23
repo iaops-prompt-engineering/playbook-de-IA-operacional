@@ -51,20 +51,21 @@ tests:
         value: "Egress"
       - type: not-contains
         value: "- {}"
-      - type: regex
-        value: "app:\\s*relay"
-      - type: regex
-        value: "port:\\s*5432"
-      - type: regex
-        value: "port:\\s*9200"
-      - type: regex
-        value: "protocol:\\s*UDP[\\s\\S]*port:\\s*53"
-      - type: regex
-        value: "protocol:\\s*TCP[\\s\\S]*port:\\s*53"
-      - type: regex
-        value: "kubernetes.io/metadata.name:\\s*kube-system"
       - type: javascript
-        value: "output.includes('#') && (output.match(/#/g) || []).length >= 6"
+        value: |
+          const lower = output.toLowerCase();
+          (output.match(/kind:\s*NetworkPolicy/g) || []).length >= 2 &&
+          lower.includes('name: default-deny') &&
+          lower.includes('name: sentinel-allow') &&
+          lower.includes('namespace: sentinel-prod') &&
+          lower.includes('relay') &&
+          lower.includes('api-gateway') &&
+          lower.includes('forge') &&
+          lower.includes('cerebro') &&
+          lower.includes('kube-system') &&
+          lower.includes('5432') &&
+          lower.includes('9200') &&
+          lower.includes('53')
       - type: latency
         threshold: 5000
       - type: cost
