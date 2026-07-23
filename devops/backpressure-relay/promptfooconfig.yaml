@@ -10,18 +10,18 @@ tests:
         Restricoes: Sentinel nao pode atrasar mais que 60s; Forge pode atrasar ate 15min; orcamento do trimestre 8% acima do previsto; perda de telemetry e inaceitavel.
         Alternativas em avaliacao: prioridade ao Sentinel, fila separada para reprocessamento, dividir Relay por cliente, autoscaling de consumidores.
     assert:
-      - type: contains
-        value: "DECISAO RECOMENDADA:"
-      - type: contains
-        value: "RESTRICOES QUE GOVERNAM A DECISAO:"
-      - type: contains
-        value: "COMPARACAO DE ALTERNATIVAS:"
-      - type: contains
-        value: "ROLLOUT PROPOSTO:"
-      - type: contains
-        value: "DESCARTES:"
-      - type: contains
-        value: "METRICAS DE SUCESSO:"
+      - type: regex
+        value: "(DECIS[AÃ]O RECOMENDADA:)"
+      - type: regex
+        value: "(RESTRI[CÇ][OÕ]ES QUE GOVERNAM A DECIS[AÃ]O:)"
+      - type: regex
+        value: "(COMPARA[CÇ][AÃ]O DE ALTERNATIVAS:)"
+      - type: regex
+        value: "(ROLLOUT PROPOSTO:)"
+      - type: regex
+        value: "(DESCARTES:)"
+      - type: regex
+        value: "(M[EÉ]TRICAS DE SUCESSO:|METRICAS DE SUCESSO:)"
       - type: not-contains
         value: "```"
       - type: latency
