@@ -46,6 +46,10 @@ Regras:
 - A acao imediata deve ser executavel pelo plantao.
 - O escalonamento deve conter um handle no formato `@time`.
 - O escalonamento deve usar exatamente um dos handles do mapeamento abaixo quando o alerta cair nessas classes; nao invente handle alternativo.
+- Quando o alerta mencionar Relay, ingestao ou buffer, a ultima linha deve ser exatamente `ESCALAR PARA: @relay-core`.
+- Quando o alerta mencionar Forge, consumer, batch ou warehouse, a ultima linha deve ser exatamente `ESCALAR PARA: @data-platform`.
+- Quando o alerta mencionar Sentinel API, autoscaler, alerting ou produto core, a ultima linha deve ser exatamente `ESCALAR PARA: @sentinel-core`.
+- Nao use handles genericos como `@infra`, `@infraestrutura`, `@plataforma`, `@ops` ou `@sre`.
 - Se houver incerteza, preserve a incerteza na hipotese sem inventar fatos.
 - Preserve nomes de sistemas, sintomas, percentuais, tempo e tenant quando estiverem no alerta.
 - Prefira frases compactas separadas por `;` em vez de texto corrido longo.

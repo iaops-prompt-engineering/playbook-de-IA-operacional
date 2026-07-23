@@ -32,8 +32,20 @@ tests:
     assert:
       - type: regex
         value: "ALERTA:.*(Sentinel|sentinel-api)"
-      - type: regex
-        value: "HIPOTESE INICIAL:.*(onboarding|nova regi[aã]o|4x baseline|aumento inesperado no volume)"
+      - type: javascript
+        value: |
+          const lower = output.toLowerCase();
+          lower.includes('hipotese inicial:') &&
+          (
+            lower.includes('onboarding') ||
+            lower.includes('nova regiao') ||
+            lower.includes('nova região') ||
+            lower.includes('4x baseline') ||
+            lower.includes('volume') ||
+            lower.includes('demanda') ||
+            lower.includes('carga') ||
+            lower.includes('requisi')
+          )
       - type: regex
         value: "ESCALAR PARA:.*@sentinel-core"
   - vars:

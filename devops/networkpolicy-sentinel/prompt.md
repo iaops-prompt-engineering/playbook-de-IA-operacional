@@ -23,6 +23,7 @@ Papel desta execucao:
 - Criticar a propria v1 como faria uma revisao de seguranca.
 - Corrigir os pontos na v2 final.
 - Manter o YAML aplicavel, sem inventar labels fora do mapa.
+- Nao reutilizar o manifesto permissivo como resposta; ele e apenas a entrada a ser corrigida.
 
 Manifesto barrado:
 
@@ -49,6 +50,7 @@ Tarefa:
 4. Inclua comentario YAML antes de toda regra explicando qual fluxo legitimo ela libera.
 5. Depois da v1, faca verificacao critica da propria saida com foco em seletor, escopo, portas, DNS, comentarios e ausencia de allow-all.
 6. Produza v2 corrigida respondendo ponto a ponto a verificacao.
+7. Em V1 e em V2 FINAL, entregue exatamente duas `kind: NetworkPolicy`: uma `default-deny` e uma `sentinel-allow`.
 
 Regras obrigatorias:
 - Nao use `podSelector: {}` na politica de allow do Sentinel, exceto na politica default-deny do namespace.
@@ -57,6 +59,12 @@ Regras obrigatorias:
 - Egress permitido: Forge porta 5432, Cerebro porta 9200 e DNS interno porta 53 TCP/UDP.
 - Inclua `policyTypes` com `Ingress` e `Egress`.
 - Lembre que `podSelector: {}` seleciona todos os pods do namespace; use isso apenas no default-deny.
+- Na politica `sentinel-allow`, use `podSelector.matchLabels.app: sentinel`.
+- Para Relay e API gateway, combine `namespaceSelector.matchLabels.kubernetes.io/metadata.name` com `podSelector.matchLabels.app`.
+- Para Forge, Cerebro e DNS, combine `namespaceSelector.matchLabels.kubernetes.io/metadata.name`, `podSelector.matchLabels` e as portas exatas.
+- Inclua DNS com UDP 53 e TCP 53.
+- Nao use blocos de codigo markdown, cercas ```yaml``` ou texto fora do formato pedido.
+- Nao mantenha `name: sentinel-allow` com `podSelector: {}` do manifesto barrado; a politica final precisa estar realmente endurecida.
 - A saida final deve conter YAML aplicavel e a verificacao resumida.
 
 Formato de saida:
