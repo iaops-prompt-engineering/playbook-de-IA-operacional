@@ -67,6 +67,20 @@ Regras obrigatorias:
 - Nao mantenha `name: sentinel-allow` com `podSelector: {}` do manifesto barrado; a politica final precisa estar realmente endurecida.
 - A saida final deve conter YAML aplicavel e a verificacao resumida.
 
+Estrutura minima esperada em cada YAML:
+- primeira policy: `name: default-deny`, `namespace: sentinel-prod`, `podSelector: {}`, `policyTypes` com `Ingress` e `Egress`
+- segunda policy: `name: sentinel-allow`, `namespace: sentinel-prod`, `podSelector.matchLabels.app: sentinel`
+- ingress da segunda policy: uma regra para Relay e uma regra para API gateway
+- egress da segunda policy: uma regra para Forge porta 5432, uma para Cerebro porta 9200, uma para DNS UDP 53 e uma para DNS TCP 53
+- cada item de ingress/egress deve ter um comentario YAML `#` imediatamente acima explicando o fluxo liberado
+
+Checklist final obrigatorio antes de responder:
+- verifique se a v1 e a v2 final tem duas `kind: NetworkPolicy`
+- verifique se a policy `sentinel-allow` nao usa `podSelector: {}`
+- verifique se nao existe `- {}` em ingress ou egress
+- verifique se Relay, api-gateway, Forge, Cerebro e kube-dns aparecem com os namespaces e labels do mapa
+- se qualquer item falhar, corrija antes de responder
+
 Formato de saida:
 
 V1:

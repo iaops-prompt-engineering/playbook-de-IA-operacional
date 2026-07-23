@@ -53,6 +53,11 @@ Regras:
 - Se houver incerteza, preserve a incerteza na hipotese sem inventar fatos.
 - Preserve nomes de sistemas, sintomas, percentuais, tempo e tenant quando estiverem no alerta.
 - Prefira frases compactas separadas por `;` em vez de texto corrido longo.
+- Checklist final obrigatorio antes de responder:
+  1. confirme que a resposta tem exatamente 5 linhas
+  2. confirme que a quinta linha comeca com `ESCALAR PARA:`
+  3. confirme que a quinta linha contem exatamente um handle do mapeamento
+  4. se faltar a quinta linha, reescreva a nota inteira antes de responder
 
 Mapeamento preferencial de escalonamento:
 - Relay ou ingestao: use exatamente `@relay-core`
