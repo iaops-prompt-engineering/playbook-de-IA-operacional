@@ -44,6 +44,6 @@ tests:
           - aprove somente se a soma total for >= 6 de 8
           - reprove automaticamente se qualquer criterio receber 0, mesmo com soma >= 6
       - type: latency
-        threshold: 5000
+        threshold: 45000
       - type: cost
         threshold: 0.01

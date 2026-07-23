@@ -215,18 +215,83 @@ Curadoria:
   - substituir `OPENAI_API_KEY` por uma chave com quota valida
   - um push/PR com workflow ativo no GitHub depois da correcao
 
-## Estado real observado no GitHub em 18 de julho de 2026
+## Estado real observado no GitHub em 23 de julho de 2026
 
-Evidencia remota conferida depois da curadoria inicial:
+Evolucao confirmada no remoto:
 
-- O repositorio tinha `OPENAI_API_KEY` cadastrado em GitHub Secrets em `2026-07-18T19:23:13Z`.
-- O repositorio nao tinha `ANTHROPIC_API_KEY` cadastrado.
-- Os runs `29657949042` (pull request em `2026-07-18T19:31:08Z`) e `29658034570` (push em `2026-07-18T19:33:52Z`) nao falharam por ausencia de `OPENAI_API_KEY`; falharam porque o provider OpenAI respondeu `HTTP 429 Too Many Requests (code: insufficient_quota)`.
-- Nesses runs o `promptfoo-action` tambem executou `npx promptfoo@latest`, instalando `promptfoo@0.121.19`, em vez da versao pinada local `0.119.14`.
-- O `cache-path` foi resolvido pelo action como `.../playbook-de-IA-operacional/~/.cache/promptfoo`, evidenciando uso de caminho relativo inadequado no workflow.
+- O workflow `.github/workflows/promptfoo.yml` foi corrigido para rodar `promptfoo-version: 0.119.14`, usar `PROMPTFOO_CONFIG_DIR`, `PROMPTFOO_CACHE_PATH`, `OPENAI_API_KEY` e `ANTHROPIC_API_KEY`, e incluir o segundo provedor na matrix:
+  - `devops/nota-de-triagem/promptfooconfig.anthropic.yaml`
+  - `devops/causa-raiz/promptfooconfig.anthropic.yaml`
+- O model id Anthropic foi ajustado para um identificador suportado pelo runtime pinado.
+- O rerun validado foi o run `29972086805`, reexecutado em `2026-07-23T01:55:58Z`, ja com a configuracao nova.
 
-Leitura pratica atual:
+### Evidencia real do rerun
 
-- O bloqueio do CI deixou de ser "secret ausente" para OpenAI e passou a ser "secret presente mas sem quota valida".
-- O segundo provedor continua ausente no repositório remoto.
-- Sem corrigir quota do OpenAI e sem cadastrar `ANTHROPIC_API_KEY`, os checkpoints 08, 09 e 10 continuam sem `PASS/FAIL` real e sem a nota do juiz em execucao concluida.
+1. `devops/causa-raiz/promptfooconfig.yaml` (`job 89102970155`, OpenAI)
+
+- A execucao saiu de erro de provider e rodou o juiz de verdade.
+- Resultado:
+  - `Successes: 0`
+  - `Failures: 1`
+  - `Errors: 0`
+  - `Pass Rate: 0.00%`
+- Tempo de avaliacao: `36s`
+- Consumo:
+  - `Evaluation`: `1,396` tokens
+  - `Grading`: `2,737` tokens
+  - `Grand Total`: `4,133` tokens
+- Saida registrada do modelo:
+
+```text
+CAUSA-RAIZ:
+A degradacao no sistema `Cerebro` ocorreu devido ao aumento excessivo da carga de indexacao durante o reindex diario enquanto havia um limite de recursos de JVM e cache, resultando em falhas de execucao e esgotamento da fila...
+```
+
+Leitura pratica:
+
+- Sim, a suite finalmente rodou esse checkpoint com resultado real e com nota do juiz em execucao concluida.
+- Nao foi `PASS`; foi `FAIL`. O gate do CP09 foi exercitado de verdade e reprovou a resposta.
+
+2. `devops/nota-de-triagem/promptfooconfig.yaml` (`job 89102970148`, OpenAI)
+
+- A execucao tambem rodou de verdade.
+- Resultado:
+  - `Successes: 0`
+  - `Failures: 3`
+  - `Errors: 0`
+  - `Pass Rate: 0.00%`
+
+Leitura pratica:
+
+- O checkpoint 08 tambem saiu de `Errors` de credencial/quota e virou falha funcional real de avaliacao.
+
+3. `devops/causa-raiz/promptfooconfig.anthropic.yaml` (`job 89102970114`, Anthropic)
+
+- O segundo provedor esta integrado na suite e foi executado.
+- Resultado:
+  - `Successes: 0`
+  - `Failures: 0`
+  - `Errors: 1`
+- Erro real: `401 authentication_error`, mensagem `invalid x-api-key`.
+
+4. `devops/nota-de-triagem/promptfooconfig.anthropic.yaml` (`job 89102970119`, Anthropic)
+
+- O segundo provedor tambem foi exercitado aqui.
+- Resultado:
+  - `Successes: 0`
+  - `Failures: 0`
+  - `Errors: 3`
+- Erro real: `401 authentication_error`, mensagem `invalid x-api-key`.
+
+### Revisao objetiva dos pontos cobrados
+
+- `Configure os secrets`: parcialmente atendido no workflow e no consumo das secrets pelo CI. `OPENAI_API_KEY` foi consumida com sucesso no rerun. `ANTHROPIC_API_KEY` esta wired no workflow, mas a chave cadastrada ainda e invalida.
+- `Rode a suite registrando o resultado real`: atendido para OpenAI em `causa-raiz` e `nota-de-triagem`. Agora ha `Failures` reais em vez de `Errors` de ambiente.
+- `Traga um segundo provedor`: atendido. Anthropic entrou na matrix, tem configs dedicados e foi executado no GitHub Actions.
+- `Traga a nota do juiz de causa-raiz`: atendido no sentido operacional. O juiz rodou de verdade no OpenAI e reprovou a resposta; a evidencia registrada acima e a saida efetiva do modelo submetida ao gate.
+
+Conclusao pratica atual:
+
+- Os checkpoints 08, 09 e 10 ja nao estao mais sem execucao real.
+- O CP09 agora tem evidencia remota real do juiz em `causa-raiz`.
+- O segundo provedor existe e roda na suite, mas continua sem resultado semantico util porque `ANTHROPIC_API_KEY` ainda falha com `401 invalid x-api-key`.
