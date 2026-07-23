@@ -1,0 +1,61 @@
+description: nota-de-triagem deterministic eval anthropic
+prompts:
+  - file://prompt.md
+providers:
+  - id: anthropic:claude-sonnet-4
+    label: anthropic-claude-sonnet-4
+defaultTest:
+  assert:
+    - type: contains
+      value: "ALERTA:"
+    - type: contains
+      value: "IMPACTO:"
+    - type: contains
+      value: "HIPOTESE INICIAL:"
+    - type: contains
+      value: "ACAO IMEDIATA:"
+    - type: contains
+      value: "ESCALAR PARA:"
+    - type: regex
+      value: "ESCALAR PARA:.*@\\w+"
+    - type: javascript
+      value: "output.split(/\\r?\\n/).filter(Boolean).length <= 8"
+    - type: latency
+      threshold: 5000
+    - type: cost
+      threshold: 0.01
+tests:
+  - vars:
+      alerta_cru: >
+        2026-05-12 14:02:09 UTC [Sentinel] autoscaler hit max replicas (60/60) on sentinel-api,
+        queue depth on Relay growing 2k/min, CPU avg 88%, tenant stark-industries
+        sending 4x baseline volume after onboarding new region
+    assert:
+      - type: regex
+        value: "ALERTA:.*Sentinel"
+      - type: regex
+        value: "HIPOTESE INICIAL:.*(onboarding|nova regiao|4x baseline)"
+      - type: regex
+        value: "ESCALAR PARA:.*@sentinel-core"
+  - vars:
+      alerta_cru: >
+        2026-05-13 03:11:00 UTC [Relay] ingest reject rate 6% for 8min, tenant wakanda-systems,
+        buffer saturated after deploy 02:55
+    assert:
+      - type: regex
+        value: "ALERTA:.*Relay"
+      - type: regex
+        value: "HIPOTESE INICIAL:.*(deploy 02:55|buffer)"
+      - type: regex
+        value: "ESCALAR PARA:.*@relay-core"
+  - vars:
+      alerta_cru: >
+        2026-05-13 11:40:22 UTC [Forge] consumer lag 9min and climbing, batch forge-batch-ingest
+        delayed after previous job failure, downstream Sentinel starting to lag
+    assert:
+      - type: regex
+        value: "ALERTA:.*Forge"
+      - type: regex
+        value: "HIPOTESE INICIAL:.*(job failure|job anterior|batch)"
+      - type: regex
+        value: "ESCALAR PARA:.*@data-platform"
