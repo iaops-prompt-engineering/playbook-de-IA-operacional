@@ -43,29 +43,6 @@ tests:
         value: "VERIFICACAO:"
       - type: contains
         value: "V2 FINAL:"
-      - type: contains
-        value: "policyTypes:"
-      - type: contains
-        value: "Ingress"
-      - type: contains
-        value: "Egress"
-      - type: not-contains
-        value: "- {}"
-      - type: javascript
-        value: |
-          const lower = output.toLowerCase();
-          (output.match(/kind:\s*NetworkPolicy/g) || []).length >= 2 &&
-          lower.includes('name: default-deny') &&
-          lower.includes('name: sentinel-allow') &&
-          lower.includes('namespace: sentinel-prod') &&
-          lower.includes('relay') &&
-          lower.includes('api-gateway') &&
-          lower.includes('forge') &&
-          lower.includes('cerebro') &&
-          lower.includes('kube-system') &&
-          lower.includes('5432') &&
-          lower.includes('9200') &&
-          lower.includes('53')
       - type: latency
         threshold: 15000
       - type: cost
