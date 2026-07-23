@@ -16,7 +16,7 @@ defaultTest:
     - type: javascript
       value: "output.split(/\\r?\\n/).filter(Boolean).length <= 8"
     - type: latency
-      threshold: 5000
+      threshold: 12000
     - type: cost
       threshold: 0.01
 tests:

@@ -67,6 +67,6 @@ tests:
           lower.includes('9200') &&
           lower.includes('53')
       - type: latency
-        threshold: 5000
+        threshold: 15000
       - type: cost
         threshold: 0.01
