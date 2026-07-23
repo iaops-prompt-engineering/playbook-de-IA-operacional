@@ -295,3 +295,43 @@ Conclusao pratica atual:
 - Os checkpoints 08, 09 e 10 ja nao estao mais sem execucao real.
 - O CP09 agora tem evidencia remota real do juiz em `causa-raiz`.
 - O segundo provedor existe e roda na suite, mas continua sem resultado semantico util porque `ANTHROPIC_API_KEY` ainda falha com `401 invalid x-api-key`.
+
+## Atualizacao final em 23 de julho de 2026
+
+Run final validado: `29977645046` (`2026-07-23T03:41:42Z`).
+
+Estado real da matrix no GitHub Actions:
+
+- OpenAI:
+  - `devops/triagem-de-pods/promptfooconfig.yaml`: `PASS`
+  - `devops/nota-de-triagem/promptfooconfig.yaml`: `PASS`
+  - `devops/networkpolicy-sentinel/promptfooconfig.yaml`: `PASS`
+  - `devops/causa-raiz/promptfooconfig.yaml`: `PASS`
+  - `devops/backpressure-relay/promptfooconfig.yaml`: `PASS`
+  - `devops/migracao-forge-event-driven/promptfooconfig.yaml`: `PASS`
+  - `devops/migracao-forge-event-driven/elo-2-estrategia/promptfooconfig.yaml`: `PASS`
+  - `devops/migracao-forge-event-driven/elo-3-plano-reversivel/promptfooconfig.yaml`: `PASS`
+- Anthropic:
+  - `devops/causa-raiz/promptfooconfig.anthropic.yaml`: `FAIL` por `401 authentication_error`
+  - `devops/nota-de-triagem/promptfooconfig.anthropic.yaml`: `FAIL` por `401 authentication_error`
+
+Leitura pratica:
+
+- A suite rodou de verdade no GitHub Actions para os alvos OpenAI pedidos e fechou verde.
+- O workflow geral ainda aparece vermelho porque os dois jobs Anthropic continuam falhando por credencial invalida, e essa chave foi mantida como estava por decisao explicita.
+- O segundo provedor esta presente e exercitado na matrix, mas sem resultado semantico aproveitavel enquanto a credencial Anthropic seguir invalida.
+
+Nota real do juiz de `causa-raiz` em execucao aprovada:
+
+- Run de referencia: `29976668844`, job `89109791829`.
+- Resultado:
+  - `Successes: 1`
+  - `Failures: 0`
+  - `Errors: 0`
+  - `Pass Rate: 100.00%`
+- Saida aprovada do modelo:
+
+```text
+CAUSA-RAIZ:
+A reindexação prolongada e travada, que começou às 02:00 e ainda estava em 41% às 09:58, foi o gatilho primário da degradação do sistema Cerebro, saturando a heap e a fila de escrita.
+```

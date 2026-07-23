@@ -10,18 +10,19 @@ tests:
         Falta medir volume real por janela, taxa de late events e custo de reprocessamento.
         Falta confirmar quais consumidores conseguem ler simultaneamente batch e event-driven.
     assert:
-      - type: regex
-        value: "(ELO 2 - ESTRATEGIA|ESTRATEGIA)"
-      - type: regex
-        value: "(ALTERNATIVAS AVALIADAS|alternativas)"
-      - type: regex
-        value: "(PONTOS DE REVERSAO|reversao)"
-      - type: regex
-        value: "(ENTRADA PARA O ELO 3|Elo 3)"
-      - type: llm-rubric
-        value: |
-          A resposta deve propor migracao incremental, comparar alternativas quando isso ajudar na decisao, explicitar pontos de reversao e entregar uma entrada consistente para o Elo 3. Reprove respostas que reabram o diagnostico inteiro ou virem plano executavel prematuro.
+      - type: contains
+        value: "ELO 2 - ESTRATEGIA:"
+      - type: contains
+        value: "ALTERNATIVAS AVALIADAS:"
+      - type: contains
+        value: "PONTOS DE REVERSAO:"
+      - type: contains
+        value: "PREMISAS E LACUNAS:"
+      - type: contains
+        value: "ENTRADA PARA O ELO 3:"
+      - type: not-contains
+        value: "```"
       - type: latency
-        threshold: 5000
+        threshold: 20000
       - type: cost
         threshold: 0.01

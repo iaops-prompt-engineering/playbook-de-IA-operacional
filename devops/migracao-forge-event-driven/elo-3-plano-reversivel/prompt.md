@@ -40,10 +40,9 @@ Regras:
 - Nao transforme rollback em nota vaga; descreva acao pratica de reversao.
 - Se faltar algum dado, explicite a lacuna em vez de inventar uma decisao.
 - A saida precisa ser detalhada o bastante para orientar execucao tecnica e acompanhamento de rollout.
+- Nao use cercas de codigo, markdown extra ou texto fora do formato final.
 
 Formato de saida:
-
-```text
 ELO 3 - PLANO EXECUTAVEL:
 <passos operacionais, validacoes e rollout>
 
@@ -61,4 +60,3 @@ CRITERIOS DE SUCESSO:
 
 ENTRADA FINAL PARA EXECUCAO:
 <resumo curto do plano pronto para virar backlog ou runbook>
-```

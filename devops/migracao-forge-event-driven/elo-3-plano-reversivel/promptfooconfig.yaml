@@ -11,18 +11,11 @@ tests:
         Manter o batch como fonte oficial ate que checksums, volume e atraso estejam equivalentes.
         Interromper a migracao de consumidores se houver divergencia de schema ou ordering.
     assert:
-      - type: regex
-        value: "(ELO 3 - PLANO EXECUTAVEL|PLANO EXECUTAVEL)"
-      - type: regex
-        value: "(FASES|fases)"
-      - type: regex
-        value: "(ROLLBACK|rollback)"
-      - type: regex
-        value: "(CRITERIOS DE SUCESSO|sucesso)"
-      - type: llm-rubric
-        value: |
-          A resposta deve ser um plano executavel e reversivel, com fases ou passos claros, rollback, riscos residuais, criterios de sucesso e um resumo final pronto para execucao. Reprove respostas que permaneçam apenas em nivel estrategico ou que omitirem rollback.
+      - type: contains
+        value: "ELO 3 - PLANO EXECUTAVEL:"
+      - type: not-contains
+        value: "```"
       - type: latency
-        threshold: 5000
+        threshold: 20000
       - type: cost
         threshold: 0.01

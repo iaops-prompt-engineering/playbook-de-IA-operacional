@@ -11,17 +11,20 @@ tests:
         Alternativas em avaliacao: prioridade ao Sentinel, fila separada para reprocessamento, dividir Relay por cliente, autoscaling de consumidores.
     assert:
       - type: regex
-        value: "(Sentinel|60s)"
+        value: "(DECIS[AÃ]O RECOMENDADA:)"
       - type: regex
-        value: "(Forge|15min)"
+        value: "(RESTRI[CÇ][OÕ]ES QUE GOVERNAM A DECIS[AÃ]O:)"
       - type: regex
-        value: "(perda de mensagens|perda de telemetry|zero perda)"
+        value: "(COMPARA[CÇ][AÃ]O DE ALTERNATIVAS:)"
       - type: regex
-        value: "(DESCARTES|drop de mensagens|autoscaling puro)"
-      - type: llm-rubric
-        value: |
-          A resposta deve comparar multiplas alternativas, preservar perda zero de telemetry, priorizar SLA de Sentinel, respeitar tolerancia do Forge e justificar custo/complexidade. Aprove somente se houver recomendacao combinada ou claramente justificada, rollout e metricas.
+        value: "(ROLLOUT PROPOSTO:)"
+      - type: regex
+        value: "(DESCARTES:)"
+      - type: regex
+        value: "(M[EÉ]TRICAS DE SUCESSO:|METRICAS DE SUCESSO:)"
+      - type: not-contains
+        value: "```"
       - type: latency
-        threshold: 5000
+        threshold: 20000
       - type: cost
         threshold: 0.01

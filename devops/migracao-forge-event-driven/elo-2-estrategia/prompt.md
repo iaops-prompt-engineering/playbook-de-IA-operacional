@@ -41,10 +41,9 @@ Regras:
 - Nao descreva um big-bang como estrategia recomendada.
 - Se uma decisao depender de dado ausente, marque como premissa ou lacuna.
 - A saida precisa ser imediatamente util como entrada operacional do proximo elo.
+- Nao use cercas de codigo, markdown extra ou texto fora do formato final.
 
 Formato de saida:
-
-```text
 ELO 2 - ESTRATEGIA:
 <estrategia incremental detalhada, com justificativa>
 
@@ -59,4 +58,3 @@ PREMISAS E LACUNAS:
 
 ENTRADA PARA O ELO 3:
 <texto que sera usado como input real do Elo 3>
-```

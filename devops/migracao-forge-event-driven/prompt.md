@@ -39,10 +39,9 @@ Regras:
 - Diga explicitamente quais dependencias e contratos tornam a migracao delicada.
 - Se uma decisao depender de dado ausente, marque como premissa ou lacuna.
 - A saida precisa ser concreta o suficiente para ser colada como entrada do Elo 2 sem reinterpretracao.
+- Nao use cercas de codigo, markdown extra ou texto fora do formato final.
 
 Formato de saida:
-
-```text
 ELO 1 - DIAGNOSTICO:
 <diagnostico estruturado do estado atual, do acoplamento e das restricoes>
 
@@ -57,4 +56,3 @@ CRITERIOS PARA O ELO 2:
 
 ENTRADA PARA O ELO 2:
 <texto que sera usado como input real do Elo 2>
-```

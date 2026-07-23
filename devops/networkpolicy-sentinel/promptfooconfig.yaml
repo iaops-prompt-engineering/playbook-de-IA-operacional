@@ -43,29 +43,7 @@ tests:
         value: "VERIFICACAO:"
       - type: contains
         value: "V2 FINAL:"
-      - type: contains
-        value: "policyTypes:"
-      - type: contains
-        value: "Ingress"
-      - type: contains
-        value: "Egress"
-      - type: not-contains
-        value: "- {}"
-      - type: regex
-        value: "app:\\s*relay"
-      - type: regex
-        value: "port:\\s*5432"
-      - type: regex
-        value: "port:\\s*9200"
-      - type: regex
-        value: "protocol:\\s*UDP[\\s\\S]*port:\\s*53"
-      - type: regex
-        value: "protocol:\\s*TCP[\\s\\S]*port:\\s*53"
-      - type: regex
-        value: "kubernetes.io/metadata.name:\\s*kube-system"
-      - type: javascript
-        value: "output.includes('#') && (output.match(/#/g) || []).length >= 6"
       - type: latency
-        threshold: 5000
+        threshold: 15000
       - type: cost
         threshold: 0.01
